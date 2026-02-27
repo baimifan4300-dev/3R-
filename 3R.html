@@ -1,0 +1,3251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3R Method - Record / Reflect / Rewire</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient-start: #F6F1EA;
+            --bg-gradient-end: #EFE7DC;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --primary: #C8A97E;
+            --primary-light: #D9C4A8;
+            --secondary-text: #8C8175;
+            --text: #5A5248;
+            --shadow: 0 8px 32px rgba(139, 119, 101, 0.12);
+            --shadow-hover: 0 12px 40px rgba(139, 119, 101, 0.18);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text);
+        }
+
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding: 24px 20px;
+            position: relative;
+        }
+
+        /* 页面切换动画 */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 28px 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover { box-shadow: var(--shadow-hover); }
+
+        /* 首页样式 */
+        .home-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+        }
+
+        .logo-container { margin-bottom: 40px; }
+
+        .logo-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 12px 40px rgba(200, 169, 126, 0.3);
+        }
+
+        .logo-icon svg { width: 60px; height: 60px; fill: white; }
+
+        .main-title {
+            font-size: 42px;
+            font-weight: 300;
+            color: var(--text);
+            letter-spacing: 4px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--secondary-text);
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+
+        .page-dots {
+            display: flex;
+            gap: 10px;
+            margin-top: 60px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dot.active { width: 24px; border-radius: 4px; background: var(--primary); }
+
+        /* 导航栏 */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 0 4px;
+            position: relative;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .nav-back, .nav-menu {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+            color: var(--secondary-text);
+        }
+
+        .nav-back:active, .nav-menu:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .nav-back svg, .nav-menu svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* 步骤标题 */
+        .step-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            font-size: 20px;
+            font-weight: 500;
+            color: white;
+        }
+
+        .step-title {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 14px;
+            color: var(--secondary-text);
+            font-weight: 300;
+        }
+
+        /* 输入区域 */
+        .input-group { margin-bottom: 20px; }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            color: var(--secondary-text);
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px 18px;
+            border: 1px solid rgba(200, 169, 126, 0.3);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+            color: var(--text);
+            font-family: inherit;
+            transition: all 0.3s ease;
+            resize: none;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 4px 16px rgba(200, 169, 126, 0.15);
+        }
+
+        .input-field::placeholder { color: #B8A99A; }
+
+        textarea.input-field { min-height: 100px; }
+
+        /* 按钮样式 */
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(200, 169, 126, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(200, 169, 126, 0.45);
+        }
+
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-secondary {
+            background: rgba(200, 169, 126, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(200, 169, 126, 0.3);
+        }
+
+        .btn-secondary:hover { background: rgba(200, 169, 126, 0.2); }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn-group .btn { flex: 1; }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(200, 169, 126, 0.2);
+            padding: 12px 24px 24px;
+            display: flex;
+            justify-content: space-around;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover { background: rgba(200, 169, 126, 0.1); }
+
+        .nav-item.active { color: var(--primary); }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--secondary-text);
+            stroke: var(--secondary-text);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active svg {
+            fill: var(--primary);
+            stroke: var(--primary);
+        }
+
+        .nav-item span {
+            font-size: 11px;
+            color: var(--secondary-text);
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active span {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* 内容区域 */
+        .content-area { padding-bottom: 100px; }
+
+        /* 说明文本 */
+        .info-text {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* 二元选择按钮 */
+        .choice-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .choice-btn {
+            flex: 1;
+            padding: 20px;
+            border: 2px solid rgba(200, 169, 126, 0.3);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-btn:hover {
+            border-color: var(--primary-light);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .choice-btn.selected {
+            border-color: var(--primary);
+            background: rgba(200, 169, 126, 0.1);
+        }
+
+        .choice-btn .icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .choice-btn .label {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* "能"按钮样式 */
+        .choice-btn-yes .icon {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 浅色✓占位 */
+        .yes-check-placeholder {
+            position: absolute;
+            width: 52px;
+            height: 52px;
+            color: rgba(200, 169, 126, 0.25);
+            transition: opacity 120ms ease-out;
+        }
+
+        .choice-btn-yes.selected .yes-check-placeholder {
+            opacity: 0;
+        }
+
+        /* 清晰✓绘制 */
+        .choice-btn-yes .yes-check {
+            position: absolute;
+            width: 52px;
+            height: 52px;
+            color: var(--primary);
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.1s ease-out;
+        }
+
+        .choice-btn-yes.selected .yes-check {
+            opacity: 1;
+        }
+
+        /* 勾选描边路径动画 */
+        .choice-btn-yes.selected .yes-check-path {
+            stroke-dasharray: 30;
+            stroke-dashoffset: 30;
+            animation: yesDrawCheck 180ms ease-out forwards;
+        }
+
+        @keyframes yesDrawCheck {
+            0% { stroke-dashoffset: 30; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        /* 绘制完成后的弹跳动画 */
+        .choice-btn-yes.selected.yes-animated .yes-check {
+            animation: yesBounce 300ms ease-out 180ms forwards;
+        }
+
+        @keyframes yesBounce {
+            0% { transform: scale(0.95); }
+            40% { transform: scale(1.05); }
+            70% { transform: scale(0.98); }
+            100% { transform: scale(1); }
+        }
+
+        /* 柔和高亮闪烁 */
+        .choice-btn-yes.selected.yes-animated::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(200, 169, 126, 0.35) 0%, transparent 60%);
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            animation: yesGlow 400ms ease-out 200ms forwards;
+            pointer-events: none;
+        }
+
+        @keyframes yesGlow {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+            50% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
+        }
+
+        /* "不能"按钮样式 */
+        .choice-btn-no .icon {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 静态圆圈占位 */
+        .no-circle-placeholder {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            border: 2.5px solid rgba(200, 169, 126, 0.25);
+            border-radius: 50%;
+            transition: opacity 120ms ease-out;
+        }
+
+        /* 选中时静态圆圈快速淡出 */
+        .choice-btn-no.selected .no-circle-placeholder {
+            opacity: 0;
+        }
+
+        /* 描边绘制圆圈 */
+        .no-circle-draw {
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            opacity: 0;
+            transform: rotate(-90deg) scale(0.95);
+            transition: opacity 0.1s ease-out;
+        }
+
+        /* 选中时显示并绘制 */
+        .choice-btn-no.selected .no-circle-draw {
+            opacity: 1;
+        }
+
+        .choice-btn-no.selected .no-circle-draw::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2.5px solid var(--primary);
+            border-radius: 50%;
+            border-top-color: transparent;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            animation: noDrawCircle 180ms ease-out forwards;
+        }
+
+        @keyframes noDrawCircle {
+            0% {
+                border-top-color: var(--primary);
+                border-right-color: transparent;
+                border-bottom-color: transparent;
+                border-left-color: transparent;
+                transform: rotate(0deg);
+            }
+            33% {
+                border-top-color: var(--primary);
+                border-right-color: var(--primary);
+                border-bottom-color: transparent;
+                border-left-color: transparent;
+            }
+            66% {
+                border-top-color: var(--primary);
+                border-right-color: var(--primary);
+                border-bottom-color: var(--primary);
+                border-left-color: transparent;
+            }
+            100% {
+                border-top-color: var(--primary);
+                border-right-color: var(--primary);
+                border-bottom-color: var(--primary);
+                border-left-color: var(--primary);
+                transform: rotate(0deg);
+            }
+        }
+
+        /* 绘制完成后的弹性反馈动画 */
+        .choice-btn-no.selected.no-animated .no-circle-draw {
+            animation: noBounce 300ms ease-out 180ms forwards;
+        }
+
+        @keyframes noBounce {
+            0% { transform: rotate(-90deg) scale(0.95); }
+            40% { transform: rotate(-90deg) scale(1.05); }
+            70% { transform: rotate(-90deg) scale(0.98); }
+            100% { transform: rotate(-90deg) scale(1); }
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(90, 82, 72, 0.95);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Day 折叠卡片样式 */
+        .day-cards-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .day-card-item {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(200, 169, 126, 0.15);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .day-card-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 12px rgba(200, 169, 126, 0.1);
+        }
+
+        .day-card-item.completed .day-card-title {
+            color: var(--secondary-text);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .day-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .day-card-header:hover { background: rgba(200, 169, 126, 0.05); }
+
+        .day-card-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .day-card-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .day-card-arrow {
+            width: 20px;
+            height: 20px;
+            fill: var(--secondary-text);
+            transition: transform 0.3s ease;
+        }
+
+        .day-card-item.expanded .day-card-arrow { transform: rotate(180deg); }
+
+        .day-card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .day-card-item.expanded .day-card-content { max-height: 300px; }
+
+        .day-card-content-inner { padding: 0 16px 16px; }
+
+        .day-card-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px 14px;
+            border: 1px solid rgba(200, 169, 126, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            color: var(--text);
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            line-height: 1.6;
+        }
+
+        .day-card-textarea:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 4px 16px rgba(200, 169, 126, 0.15);
+        }
+
+        .day-card-textarea::placeholder { color: #B8A99A; }
+
+        /* 待办列表勾选框 */
+        .todo-checkbox {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .todo-checkbox svg {
+            width: 14px;
+            height: 14px;
+            fill: white;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s ease;
+        }
+
+        .day-card-item.completed .todo-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .day-card-item.completed .todo-checkbox svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* 进度提示 */
+        .progress-hint {
+            font-size: 13px;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        /* 历史记录样式 */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(200, 169, 126, 0.15);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 16px rgba(200, 169, 126, 0.15);
+        }
+
+        .history-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+        }
+
+        .history-date {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .history-date-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .history-date-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .history-date-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .history-date-sub {
+            font-size: 12px;
+            color: var(--secondary-text);
+            margin-top: 2px;
+        }
+
+        .history-arrow {
+            width: 20px;
+            height: 20px;
+            fill: var(--secondary-text);
+            transition: transform 0.3s ease;
+        }
+
+        .history-item.expanded .history-arrow { transform: rotate(180deg); }
+
+        .history-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .history-item.expanded .history-content { max-height: 800px; }
+
+        .history-content-inner { padding: 0 20px 20px; }
+
+        .history-section {
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+        }
+
+        .history-section:last-child { margin-bottom: 0; }
+
+        .history-section-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .history-section-content {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.7;
+            word-break: break-word;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--secondary-text);
+        }
+
+        .history-empty svg {
+            width: 64px;
+            height: 64px;
+            fill: var(--primary-light);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .history-empty-text { font-size: 15px; }
+
+        /* 历史记录标签样式 */
+        .history-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(200, 169, 126, 0.15);
+        }
+
+        .history-tab {
+            flex: 1;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--secondary-text);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-tab:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .history-tab.active {
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            box-shadow: 0 4px 12px rgba(200, 169, 126, 0.3);
+        }
+
+        .history-content-panel {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* 下拉菜单样式 */
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(139, 119, 101, 0.2);
+            border: 1px solid rgba(200, 169, 126, 0.2);
+            padding: 8px;
+            min-width: 160px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 200;
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .dropdown-item:hover { background: rgba(200, 169, 126, 0.1); }
+
+        .dropdown-item svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--secondary-text);
+        }
+
+        /* 日历样式 */
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 8px;
+        }
+
+        .calendar-nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(200, 169, 126, 0.1);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--primary);
+        }
+
+        .calendar-nav-btn:hover {
+            background: rgba(200, 169, 126, 0.2);
+        }
+
+        .calendar-nav-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .calendar-month {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--secondary-text);
+            padding: 8px 4px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid transparent;
+        }
+
+        .calendar-day:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.other-month {
+            color: var(--secondary-text);
+            opacity: 0.5;
+        }
+
+        .calendar-day.today {
+            border-color: var(--primary);
+            font-weight: 500;
+        }
+
+        .calendar-day.recorded {
+            background: rgba(200, 169, 126, 0.15);
+            border: 1px solid rgba(200, 169, 126, 0.25);
+        }
+
+        .calendar-day.recorded:hover {
+            background: rgba(200, 169, 126, 0.25);
+            border-color: rgba(200, 169, 126, 0.4);
+        }
+
+        .calendar-day-number {
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .calendar-day-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--primary);
+            margin-top: 2px;
+        }
+
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(200, 169, 126, 0.15);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--secondary-text);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.recorded {
+            background: rgba(200, 169, 126, 0.3);
+            border: 1px solid rgba(200, 169, 126, 0.4);
+        }
+
+        .legend-dot.unrecorded {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(200, 169, 126, 0.2);
+        }
+
+        /* 日历详情弹窗 */
+        .calendar-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .calendar-modal.show {
+            display: flex;
+        }
+
+        .calendar-modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .calendar-modal-content {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 360px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-hover);
+            animation: modalSlideUp 0.3s ease-out;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .calendar-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(200, 169, 126, 0.15);
+        }
+
+        .calendar-modal-header h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .calendar-modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(200, 169, 126, 0.1);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--secondary-text);
+        }
+
+        .calendar-modal-close:hover {
+            background: rgba(200, 169, 126, 0.2);
+        }
+
+        .calendar-modal-close svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .calendar-modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            max-height: calc(80vh - 73px);
+        }
+
+        .modal-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--secondary-text);
+        }
+
+        .modal-empty svg {
+            width: 48px;
+            height: 48px;
+            fill: var(--primary-light);
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .modal-section {
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-section-content {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.7;
+            word-break: break-word;
+        }
+
+        /* 文案管理样式 */
+        .quote-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quote-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--secondary-text);
+        }
+
+        .quote-empty svg {
+            width: 48px;
+            height: 48px;
+            fill: var(--primary-light);
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .quote-item {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(200, 169, 126, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .quote-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 16px rgba(200, 169, 126, 0.1);
+        }
+
+        .quote-text {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.7;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+
+        .quote-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .quote-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quote-btn-edit {
+            background: rgba(200, 169, 126, 0.15);
+            color: var(--primary);
+        }
+
+        .quote-btn-edit:hover {
+            background: rgba(200, 169, 126, 0.25);
+        }
+
+        .quote-btn-delete {
+            background: rgba(255, 100, 100, 0.1);
+            color: #e57373;
+        }
+
+        .quote-btn-delete:hover {
+            background: rgba(255, 100, 100, 0.2);
+        }
+
+        .quote-edit-area {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .quote-edit-area.show {
+            display: block;
+        }
+
+        .quote-edit-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(200, 169, 126, 0.3);
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text);
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 8px;
+        }
+
+        .quote-edit-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* 首页随机文案样式 */
+        .home-quote {
+            text-align: center;
+            padding: 20px 24px;
+            margin: 20px auto;
+            max-width: 320px;
+        }
+
+        .home-quote-text {
+            font-size: 14px;
+            color: var(--secondary-text);
+            font-style: italic;
+            line-height: 1.8;
+            position: relative;
+        }
+
+        .home-quote-text::before,
+        .home-quote-text::after {
+            content: '"';
+            font-size: 20px;
+            color: var(--primary-light);
+            font-family: Georgia, serif;
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .app-container { padding: 20px 16px; }
+            .main-title { font-size: 36px; }
+            .card { padding: 24px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 首页 -->
+        <div class="page active" id="page-home">
+            <div class="home-page">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    </div>
+                    <h1 class="main-title">3R Method</h1>
+                    <p class="subtitle">Record / Reflect / Rewire</p>
+                </div>
+                <!-- 随机文案区域 -->
+                <div class="home-quote" id="home-quote" style="display: none;">
+                    <p class="home-quote-text" id="home-quote-text"></p>
+                </div>
+                <div class="page-dots">
+                    <div class="dot active" data-page="home"></div>
+                    <div class="dot" data-page="record"></div>
+                    <div class="dot" data-page="reflect"></div>
+                    <div class="dot" data-page="rewire"></div>
+                    <div class="dot" data-page="log"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Record 页面 -->
+        <div class="page" id="page-record">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goHome()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">记录</span>
+                <button class="nav-menu" onclick="toggleRecordMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+                <div class="dropdown-menu" id="record-menu">
+                    <div class="dropdown-item" onclick="showHistoryPage()">
+                        <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                        <span>历史记录</span>
+                    </div>
+                </div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <h2 class="step-title">Record</h2>
+                    <p class="step-desc">记录当下，觉察内心</p>
+                </div>
+                <div class="card">
+                    <div class="input-group">
+                        <label class="input-label">我的想法</label>
+                        <textarea class="input-field" id="record-thoughts" placeholder="写下今天脑海中浮现的那些事..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">我的情绪感受</label>
+                        <textarea class="input-field" id="record-feelings" placeholder="描述一下今天的主要情绪感受..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">最大的卡点/疑问</label>
+                        <textarea class="input-field" id="record-block" placeholder="有什么困扰你或让你疑惑的事情？"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveRecord()">保存记录</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录页面 -->
+        <div class="page" id="page-history">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goBackToRecord()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">历史记录</span>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">📚</div>
+                    <h2 class="step-title">历史记录</h2>
+                    <p class="step-desc">回顾过往，看见成长</p>
+                </div>
+                <div class="card">
+                    <div class="history-list" id="history-list">
+                        <div class="history-empty">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                            <div class="history-empty-text">暂无历史记录</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 反思历史记录页面 -->
+        <div class="page" id="page-reflect-history">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goBackToReflect()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">反思历史</span>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">📚</div>
+                    <h2 class="step-title">周反思历史</h2>
+                    <p class="step-desc">回顾过往，看见成长轨迹</p>
+                </div>
+                <!-- 分类标签 -->
+                <div class="history-tabs">
+                    <div class="history-tab active" data-tab="weekly" onclick="switchHistoryTab('weekly')">周汇总</div>
+                    <div class="history-tab" data-tab="pattern" onclick="switchHistoryTab('pattern')">规律记录</div>
+                </div>
+                <!-- 周汇总内容 -->
+                <div class="history-content-panel" id="weekly-panel">
+                    <div class="card">
+                        <div class="history-list" id="weekly-history-list">
+                            <div class="history-empty">
+                                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                                <div class="history-empty-text">暂无周汇总记录</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 规律记录内容 -->
+                <div class="history-content-panel" id="pattern-panel" style="display: none;">
+                    <div class="card">
+                        <div class="history-list" id="pattern-history-list">
+                            <div class="history-empty">
+                                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                                <div class="history-empty-text">暂无规律记录</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reflect 页面 -->
+        <div class="page" id="page-reflect">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goHome()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">反思</span>
+                <button class="nav-menu" onclick="toggleReflectMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+                <div class="dropdown-menu" id="reflect-menu">
+                    <div class="dropdown-item" onclick="showReflectHistoryPage()">
+                        <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                        <span>历史记录</span>
+                    </div>
+                </div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <h2 class="step-title">Reflect</h2>
+                    <p class="step-desc">回顾整理，看见模式</p>
+                </div>
+                <div class="card">
+                    <p class="info-text">
+                        定期回顾你的记录，可以帮助你发现思维和行为模式。生成周汇总，让AI帮你分析深层规律。
+                    </p>
+                    <button class="btn btn-primary" onclick="generateSummary()">生成本周汇总</button>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="copyWeeklySummary()">复制本周汇总</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--primary); text-align: center;">让AI总结的两种规律</h3>
+                    <div style="margin-bottom: 20px; padding: 16px; background: rgba(200, 169, 126, 0.08); border-radius: 12px;">
+                        <p style="font-size: 15px; color: var(--text); margin-bottom: 12px; line-height: 1.6;">1. 你在我的思维方式里看到了什么规律？</p>
+                        <p style="font-size: 15px; color: var(--text); line-height: 1.6;">2. 我在哪里阻碍了自己？</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="copyAIQuestions()">复制给AI分析</button>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--primary); text-align: center;">规律记录</h3>
+                    <div class="input-group" style="margin-bottom: 16px;">
+                        <textarea class="input-field" id="pattern-record" placeholder="记录你从AI分析或自我反思中发现的规律..." style="min-height: 120px;"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="savePatternRecord()">保存规律</button>
+                </div>
+                <div class="card" id="summary-card" style="display: none;">
+                    <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--primary);">本周汇总</h3>
+                    <div id="summary-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rewire 页面 -->
+        <div class="page" id="page-rewire">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goHome()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">重塑</span>
+                <button class="nav-menu" onclick="showMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <h2 class="step-title">Rewire</h2>
+                    <p class="step-desc">设定目标，重塑习惯</p>
+                </div>
+                <div class="card">
+                    <div class="input-group">
+                        <label class="input-label">本周唯一任务</label>
+                        <input type="text" class="input-field" id="rewire-task" placeholder="这周你最想完成的一件事...">
+                    </div>
+                </div>
+                <div class="card">
+                    <label class="input-label">7天具体步骤</label>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <textarea class="input-field" id="steps-paste-area" placeholder="粘贴你的步骤描述，例如：第一天整理资料，第二天开始写作..."></textarea>
+                        <button class="btn btn-secondary" onclick="autoSplitSteps()" style="margin-top: 12px;">自动拆分</button>
+                    </div>
+                    <div class="progress-hint" id="progress-hint">完成进度：0 / 7</div>
+                    <div class="day-cards-list" id="day-cards-list">
+                        <div class="day-card-item" data-day="1">
+                            <div class="day-card-header" onclick="toggleDayCard(1)">
+                                <div class="day-card-left">
+                                    <div class="todo-checkbox" onclick="event.stopPropagation(); toggleTodo(1)">
+                                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                    </div>
+                                    <span class="day-card-title">Day 1</span>
+                                </div>
+                                <svg class="day-card-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                            <div class="day-card-content">
+                                <div class="day-card-content-inner">
+                                    <textarea class="day-card-textarea" id="todo-1" placeholder="输入 Day 1 的详细步骤..." onchange="saveTodos()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="day-card-item" data-day="2">
+                            <div class="day-card-header" onclick="toggleDayCard(2)">
+                                <div class="day-card-left">
+                                    <div class="todo-checkbox" onclick="event.stopPropagation(); toggleTodo(2)">
+                                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                    </div>
+                                    <span class="day-card-title">Day 2</span>
+                                </div>
+                                <svg class="day-card-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                            <div class="day-card-content">
+                                <div class="day-card-content-inner">
+                                    <textarea class="day-card-textarea" id="todo-2" placeholder="输入 Day 2 的详细步骤..." onchange="saveTodos()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="day-card-item" data-day="3">
+                            <div class="day-card-header" onclick="toggleDayCard(3)">
+                                <div class="day-card-left">
+                                    <div class="todo-checkbox" onclick="event.stopPropagation(); toggleTodo(3)">
+                                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                    </div>
+                                    <span class="day-card-title">Day 3</span>
+                                </div>
+                                <svg class="day-card-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                            <div class="day-card-content">
+                                <div class="day-card-content-inner">
+                                    <textarea class="day-card-textarea" id="todo-3" placeholder="输入 Day 3 的详细步骤..." onchange="saveTodos()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="day-card-item" data-day="4">
+                            <div class="day-card-header" onclick="toggleDayCard(4)">
+                                <div class="day-card-left">
+                                    <div class="todo-checkbox" onclick="event.stopPropagation(); toggleTodo(4)">
+                                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                    </div>
+                                    <span class="day-card-title">Day 4</span>
+                                </div>
+                                <svg class="day-card-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                            <div class="day-card-content">
+                                <div class="day-card-content-inner">
+                                    <textarea class="day-card-textarea" id="todo-4" placeholder="输入 Day 4 的详细步骤..." onchange="saveTodos()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="day-card-item" data-day="5">
+                            <div class="day-card-header" onclick="toggleDayCard(5)">
+                                <div class="day-card-left">
+                                    <div class="todo-checkbox" onclick="event.stopPropagation(); toggleTodo(5)">
+                                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                    </div>
+                                    <span class="day-card-title">Day 5</span>
+                                </div>
+                                <svg class="day-card-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                            <div class="day-card-content">
+                                <div class="day-card-content-inner">
+                                    <textarea class="day-card-textarea" id="todo-5" placeholder="输入 Day 5 的详细步骤..." onchange="saveTodos()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="day-card-item" data-day="6">
+                            <div class="day-card-header" onclick="toggleDayCard(6)">
+                                <div class="day-card-left">
+                                    <div class="todo-checkbox" onclick="event.stopPropagation(); toggleTodo(6)">
+                                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                    </div>
+                                    <span class="day-card-title">Day 6</span>
+                                </div>
+                                <svg class="day-card-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                            <div class="day-card-content">
+                                <div class="day-card-content-inner">
+                                    <textarea class="day-card-textarea" id="todo-6" placeholder="输入 Day 6 的详细步骤..." onchange="saveTodos()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="day-card-item" data-day="7">
+                            <div class="day-card-header" onclick="toggleDayCard(7)">
+                                <div class="day-card-left">
+                                    <div class="todo-checkbox" onclick="event.stopPropagation(); toggleTodo(7)">
+                                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                    </div>
+                                    <span class="day-card-title">Day 7</span>
+                                </div>
+                                <svg class="day-card-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                            </div>
+                            <div class="day-card-content">
+                                <div class="day-card-content-inner">
+                                    <textarea class="day-card-textarea" id="todo-7" placeholder="输入 Day 7 的详细步骤..." onchange="saveTodos()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveRewire()" style="margin-top: 20px;">保存目标</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 执行日志页面 -->
+        <div class="page" id="page-log">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goHome()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">执行日志</span>
+                <button class="nav-menu" onclick="toggleLogMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+                <div class="dropdown-menu" id="log-menu">
+                    <div class="dropdown-item" onclick="showLogHistoryPage()">
+                        <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                        <span>历史记录</span>
+                    </div>
+                </div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <h2 class="step-title">执行日志</h2>
+                    <p class="step-desc">记录行动，追踪成长</p>
+                </div>
+                <div class="card">
+                    <label class="input-label" style="text-align: center; display: block; margin-bottom: 16px;">今日是否执行？</label>
+                    <div class="choice-group">
+                        <div class="choice-btn choice-btn-yes" onclick="selectChoice(this, 'yes')">
+                            <div class="icon">
+                                <svg class="yes-check-placeholder" viewBox="0 0 32 32">
+                                    <path d="M8 16 L14 22 L24 10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <svg class="yes-check" viewBox="0 0 32 32">
+                                    <path class="yes-check-path" d="M8 16 L14 22 L24 10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="label">Yes</div>
+                        </div>
+                        <div class="choice-btn choice-btn-no" onclick="selectChoice(this, 'no')">
+                            <div class="icon">
+                                <span class="no-circle-placeholder"></span>
+                                <span class="no-circle-draw"></span>
+                            </div>
+                            <div class="label">No</div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">执行结果</label>
+                        <textarea class="input-field" id="log-result" placeholder="今天你做了什么？"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">感受反馈</label>
+                        <textarea class="input-field" id="log-feedback" placeholder="执行后的感受如何？"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveLog()">保存日志</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日历页面 -->
+        <div class="page" id="page-calendar">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goHome()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">日历</span>
+                <button class="nav-menu" onclick="toggleCalendarMenu()">
+                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </button>
+                <div class="dropdown-menu" id="calendar-menu">
+                    <div class="dropdown-item" onclick="showQuoteManagePage()">
+                        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                        <span>首页文案</span>
+                    </div>
+                </div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <h2 class="step-title">记录日历</h2>
+                    <p class="step-desc">时光印记，见证成长</p>
+                </div>
+                <div class="card">
+                    <!-- 月份切换 -->
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">
+                            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                        </button>
+                        <div class="calendar-month" id="calendar-month">2024年2月</div>
+                        <button class="calendar-nav-btn" onclick="changeMonth(1)">
+                            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </button>
+                    </div>
+                    <!-- 星期标题 -->
+                    <div class="calendar-weekdays">
+                        <div class="weekday">日</div>
+                        <div class="weekday">一</div>
+                        <div class="weekday">二</div>
+                        <div class="weekday">三</div>
+                        <div class="weekday">四</div>
+                        <div class="weekday">五</div>
+                        <div class="weekday">六</div>
+                    </div>
+                    <!-- 日期网格 -->
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- 动态生成 -->
+                    </div>
+                    <!-- 图例 -->
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot recorded"></div>
+                            <span>已记录</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot unrecorded"></div>
+                            <span>未记录</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日期详情弹窗 -->
+        <div class="calendar-modal" id="calendar-modal">
+            <div class="calendar-modal-overlay" onclick="closeCalendarModal()"></div>
+            <div class="calendar-modal-content">
+                <div class="calendar-modal-header">
+                    <h3 id="modal-date">2024年2月26日</h3>
+                    <button class="calendar-modal-close" onclick="closeCalendarModal()">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+                <div class="calendar-modal-body" id="modal-body">
+                    <!-- 动态内容 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 首页文案管理页面 -->
+        <div class="page" id="page-quote-manage">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goBackToCalendar()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">首页文案</span>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">✨</div>
+                    <h2 class="step-title">文案管理</h2>
+                    <p class="step-desc">编辑每日灵感语录</p>
+                </div>
+                <!-- 添加新文案 -->
+                <div class="card">
+                    <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--primary);">添加新文案</h3>
+                    <div class="input-group" style="margin-bottom: 12px;">
+                        <textarea class="input-field" id="new-quote-text" placeholder="输入文案内容..." style="min-height: 80px;"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="addQuote()">添加文案</button>
+                </div>
+                <!-- 文案列表 -->
+                <div class="card">
+                    <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--primary);">文案库</h3>
+                    <div class="quote-list" id="quote-list">
+                        <div class="quote-empty">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                            <div>暂无文案，请添加</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志历史记录页面 -->
+        <div class="page" id="page-log-history">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goBackToLog()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">日志历史</span>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">📋</div>
+                    <h2 class="step-title">执行日志历史</h2>
+                    <p class="step-desc">回顾行动轨迹，见证持续进步</p>
+                </div>
+                <div class="card">
+                    <div class="history-list" id="log-history-list">
+                        <div class="history-empty">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                            <div class="history-empty-text">暂无日志记录</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 日志详情弹窗 -->
+        <div class="calendar-modal" id="log-detail-modal">
+            <div class="calendar-modal-overlay" onclick="closeLogDetailModal()"></div>
+            <div class="calendar-modal-content">
+                <div class="calendar-modal-header">
+                    <h3 id="log-detail-date">2024年2月26日</h3>
+                    <button class="calendar-modal-close" onclick="closeLogDetailModal()">
+                        <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+                <div class="calendar-modal-body" id="log-detail-body">
+                    <!-- 动态内容 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="showPage('home')">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span>首页</span>
+            </div>
+            <div class="nav-item" onclick="showPage('record')">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <span>记录</span>
+            </div>
+            <div class="nav-item" onclick="showPage('reflect')">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                <span>反思</span>
+            </div>
+            <div class="nav-item" onclick="showPage('rewire')">
+                <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                <span>重塑</span>
+            </div>
+            <div class="nav-item" onclick="showPage('log')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="3" width="16" height="18" rx="2" ry="2"/>
+                    <line x1="8" y1="9" x2="16" y2="9"/>
+                    <line x1="8" y1="13" x2="16" y2="13"/>
+                </svg>
+                <span>日志</span>
+            </div>
+            <div class="nav-item" onclick="showPage('calendar')">
+                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                <span>日历</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 数据存储
+        const storage = {
+            get: (key) => {
+                const data = localStorage.getItem('3r_' + key);
+                return data ? JSON.parse(data) : null;
+            },
+            set: (key, value) => {
+                localStorage.setItem('3r_' + key, JSON.stringify(value));
+            }
+        };
+
+        // 页面切换
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page-' + pageName).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+            const dotIndex = ['home', 'record', 'reflect', 'rewire', 'log', 'calendar'].indexOf(pageName);
+            if (dotIndex >= 0) {
+                document.querySelectorAll('.dot')[dotIndex].classList.add('active');
+            }
+            
+            // 如果切换到日历页面，渲染日历
+            if (pageName === 'calendar') {
+                renderCalendar();
+            }
+        }
+
+        // 返回首页
+        function goHome() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page-home').classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector('.nav-item').classList.add('active');
+            document.querySelectorAll('.dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+            document.querySelector('.dot').classList.add('active');
+        }
+
+        // 显示菜单
+        function showMenu() {
+            showToast('菜单功能开发中');
+        }
+
+        // Toast 提示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 保存记录
+        function saveRecord() {
+            const thoughts = document.getElementById('record-thoughts').value;
+            const feelings = document.getElementById('record-feelings').value;
+            const block = document.getElementById('record-block').value;
+            
+            if (!thoughts && !feelings && !block) {
+                showToast('请至少填写一项内容');
+                return;
+            }
+            
+            const today = new Date().toLocaleDateString('zh-CN');
+            let dailyRecords = storage.get('dailyRecords') || {};
+            
+            dailyRecords[today] = {
+                date: today,
+                thoughts,
+                feelings,
+                block,
+                updatedAt: Date.now()
+            };
+            
+            storage.set('dailyRecords', dailyRecords);
+            showToast('记录已保存');
+        }
+
+        // 加载今日记录
+        function loadTodayRecord() {
+            const today = new Date().toLocaleDateString('zh-CN');
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const todayRecord = dailyRecords[today];
+            
+            if (todayRecord) {
+                document.getElementById('record-thoughts').value = todayRecord.thoughts || '';
+                document.getElementById('record-feelings').value = todayRecord.feelings || '';
+                document.getElementById('record-block').value = todayRecord.block || '';
+            }
+        }
+
+        // 切换 Record 页面菜单
+        function toggleRecordMenu() {
+            const menu = document.getElementById('record-menu');
+            menu.classList.toggle('show');
+        }
+
+        // 切换 Reflect 页面菜单
+        function toggleReflectMenu() {
+            const menu = document.getElementById('reflect-menu');
+            menu.classList.toggle('show');
+        }
+
+        // 显示反思历史记录页面
+        function showReflectHistoryPage() {
+            document.getElementById('reflect-menu').classList.remove('show');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-reflect-history').classList.add('active');
+            loadReflectHistory();
+        }
+
+        // 返回反思页面
+        function goBackToReflect() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-reflect').classList.add('active');
+        }
+
+        // 当前选中的历史记录标签
+        let currentHistoryTab = 'weekly';
+
+        // 切换历史记录标签
+        function switchHistoryTab(tab) {
+            currentHistoryTab = tab;
+            
+            // 更新标签样式
+            document.querySelectorAll('.history-tab').forEach(t => {
+                t.classList.remove('active');
+                if (t.dataset.tab === tab) {
+                    t.classList.add('active');
+                }
+            });
+            
+            // 切换内容面板
+            document.querySelectorAll('.history-content-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            document.getElementById(`${tab}-panel`).style.display = 'block';
+            
+            // 加载对应数据
+            if (tab === 'weekly') {
+                loadWeeklyHistory();
+            } else {
+                loadPatternHistory();
+            }
+        }
+
+        // 加载反思历史记录
+        function loadReflectHistory() {
+            // 根据当前标签加载对应内容
+            if (currentHistoryTab === 'weekly') {
+                loadWeeklyHistory();
+            } else {
+                loadPatternHistory();
+            }
+        }
+
+        // 加载周汇总历史
+        function loadWeeklyHistory() {
+            const historyList = document.getElementById('weekly-history-list');
+            const weeklyArchives = storage.get('reflectWeeklyArchives') || {};
+            
+            // 按周倒序排列
+            const weeks = Object.keys(weeklyArchives).sort((a, b) => {
+                return new Date(weeklyArchives[b].endDate) - new Date(weeklyArchives[a].endDate);
+            });
+            
+            if (weeks.length === 0) {
+                historyList.innerHTML = `
+                    <div class="history-empty">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        <div class="history-empty-text">暂无周汇总记录</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = weeks.map((weekKey) => {
+                const archive = weeklyArchives[weekKey];
+                const weekRange = `${archive.startDate} 至 ${archive.endDate}`;
+                const recordCount = archive.records ? archive.records.length : 0;
+                
+                return `
+                    <div class="history-item" data-week="${weekKey}" onclick="toggleWeeklyHistoryItem('${weekKey}')">
+                        <div class="history-item-header">
+                            <div class="history-date">
+                                <div class="history-date-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="history-date-text">第 ${archive.weekNumber} 周</div>
+                                    <div class="history-date-sub">${weekRange} · ${recordCount} 条记录</div>
+                                </div>
+                            </div>
+                            <svg class="history-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+                        <div class="history-content">
+                            <div class="history-content-inner">
+                                ${archive.summary ? `
+                                    <div class="history-section">
+                                        <div class="history-section-title">本周汇总</div>
+                                        <div class="history-section-content">${escapeHtml(archive.summary)}</div>
+                                    </div>
+                                ` : ''}
+                                ${archive.records && archive.records.length > 0 ? `
+                                    <div class="history-section">
+                                        <div class="history-section-title">详细记录</div>
+                                        <div class="history-section-content">
+                                            ${archive.records.map(r => `
+                                                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(200, 169, 126, 0.2);">
+                                                    <div style="font-size: 13px; color: var(--primary); margin-bottom: 4px;">${r.date}</div>
+                                                    ${r.thoughts ? `<div style="font-size: 14px; margin-bottom: 4px;">想法：${escapeHtml(r.thoughts)}</div>` : ''}
+                                                    ${r.feelings ? `<div style="font-size: 14px; margin-bottom: 4px;">感受：${escapeHtml(r.feelings)}</div>` : ''}
+                                                    ${r.block ? `<div style="font-size: 14px;">卡点：${escapeHtml(r.block)}</div>` : ''}
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 加载规律记录历史（按周分组）
+        function loadPatternHistory() {
+            const historyList = document.getElementById('pattern-history-list');
+            const patternRecords = storage.get('patternRecords') || {};
+            
+            // 将规律记录按周分组
+            const weeklyPatterns = {};
+            Object.keys(patternRecords).forEach(date => {
+                const weekKey = getWeekKey(new Date(date));
+                if (!weeklyPatterns[weekKey]) {
+                    const weekRange = getWeekRange(weekKey);
+                    weeklyPatterns[weekKey] = {
+                        weekKey: weekKey,
+                        weekNumber: parseInt(weekKey.split('-W')[1]),
+                        startDate: weekRange.startDate,
+                        endDate: weekRange.endDate,
+                        patterns: []
+                    };
+                }
+                patternRecords[date].forEach(p => {
+                    weeklyPatterns[weekKey].patterns.push({
+                        date: date,
+                        content: p.content,
+                        createdAt: p.createdAt
+                    });
+                });
+            });
+            
+            // 按周倒序排列
+            const weeks = Object.keys(weeklyPatterns).sort((a, b) => {
+                return new Date(weeklyPatterns[b].endDate) - new Date(weeklyPatterns[a].endDate);
+            });
+            
+            if (weeks.length === 0) {
+                historyList.innerHTML = `
+                    <div class="history-empty">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        <div class="history-empty-text">暂无规律记录</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = weeks.map((weekKey) => {
+                const weekData = weeklyPatterns[weekKey];
+                const weekRange = `${weekData.startDate} 至 ${weekData.endDate}`;
+                const patternCount = weekData.patterns.length;
+                
+                // 按日期倒序排列规律
+                const sortedPatterns = weekData.patterns.sort((a, b) => b.createdAt - a.createdAt);
+                
+                return `
+                    <div class="history-item" data-week="${weekKey}" onclick="togglePatternHistoryItem('${weekKey}')">
+                        <div class="history-item-header">
+                            <div class="history-date">
+                                <div class="history-date-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="history-date-text">第 ${weekData.weekNumber} 周</div>
+                                    <div class="history-date-sub">${weekRange} · ${patternCount} 条规律</div>
+                                </div>
+                            </div>
+                            <svg class="history-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+                        <div class="history-content">
+                            <div class="history-content-inner">
+                                ${sortedPatterns.map((p, index) => `
+                                    <div class="history-section">
+                                        <div class="history-section-title">${p.date} · 规律 ${index + 1}</div>
+                                        <div class="history-section-content">${escapeHtml(p.content)}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 切换周汇总历史项展开/收起
+        function toggleWeeklyHistoryItem(weekKey) {
+            const item = document.querySelector(`#weekly-panel .history-item[data-week="${weekKey}"]`);
+            if (item) item.classList.toggle('expanded');
+        }
+
+        // 切换规律记录历史项展开/收起
+        function togglePatternHistoryItem(weekKey) {
+            const item = document.querySelector(`#pattern-panel .history-item[data-week="${weekKey}"]`);
+            if (item) item.classList.toggle('expanded');
+        }
+
+        // 显示历史记录页面
+        function showHistoryPage() {
+            document.getElementById('record-menu').classList.remove('show');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-history').classList.add('active');
+            loadHistory();
+        }
+
+        // 返回记录页面
+        function goBackToRecord() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-record').classList.add('active');
+        }
+
+        // 加载历史记录
+        function loadHistory() {
+            const historyList = document.getElementById('history-list');
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const today = new Date().toLocaleDateString('zh-CN');
+            
+            // 过滤掉今天的记录，只显示历史记录
+            const dates = Object.keys(dailyRecords)
+                .filter(date => date !== today)
+                .sort((a, b) => new Date(b) - new Date(a));
+            
+            if (dates.length === 0) {
+                historyList.innerHTML = `
+                    <div class="history-empty">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        <div class="history-empty-text">暂无历史记录</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = dates.map((date) => {
+                const record = dailyRecords[date];
+                const dayOfWeek = new Date(date).toLocaleDateString('zh-CN', { weekday: 'short' });
+                
+                return `
+                    <div class="history-item" data-date="${date}" onclick="toggleHistoryItem('${date}')">
+                        <div class="history-item-header">
+                            <div class="history-date">
+                                <div class="history-date-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="history-date-text">${date}</div>
+                                    <div class="history-date-sub">${dayOfWeek}</div>
+                                </div>
+                            </div>
+                            <svg class="history-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+                        <div class="history-content">
+                            <div class="history-content-inner">
+                                ${record.thoughts ? `
+                                    <div class="history-section">
+                                        <div class="history-section-title">我的想法</div>
+                                        <div class="history-section-content">${escapeHtml(record.thoughts)}</div>
+                                    </div>
+                                ` : ''}
+                                ${record.feelings ? `
+                                    <div class="history-section">
+                                        <div class="history-section-title">情绪感受</div>
+                                        <div class="history-section-content">${escapeHtml(record.feelings)}</div>
+                                    </div>
+                                ` : ''}
+                                ${record.block ? `
+                                    <div class="history-section">
+                                        <div class="history-section-title">卡点/疑问</div>
+                                        <div class="history-section-content">${escapeHtml(record.block)}</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 切换历史记录项展开/收起
+        function toggleHistoryItem(date) {
+            const item = document.querySelector(`.history-item[data-date="${date}"]`);
+            item.classList.toggle('expanded');
+        }
+
+        // 归档每日记录（每天凌晨5点归档）
+        function archiveDailyRecord() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const today = now.toLocaleDateString('zh-CN');
+            const lastArchiveDate = storage.get('lastArchiveDate');
+            
+            // 如果已经过了凌晨5点且今天还没有归档
+            if (currentHour >= 5 && lastArchiveDate !== today) {
+                // 获取昨天的日期
+                const yesterday = new Date(now);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toLocaleDateString('zh-CN');
+                
+                // 获取昨天的记录（如果存在）
+                const dailyRecords = storage.get('dailyRecords') || {};
+                const yesterdayRecord = dailyRecords[yesterdayStr];
+                
+                // 如果昨天有记录，标记为已归档
+                if (yesterdayRecord) {
+                    yesterdayRecord.archived = true;
+                    yesterdayRecord.archivedAt = Date.now();
+                    storage.set('dailyRecords', dailyRecords);
+                }
+                
+                // 清空当前记录页面内容（自动清空）
+                document.getElementById('record-thoughts').value = '';
+                document.getElementById('record-feelings').value = '';
+                document.getElementById('record-block').value = '';
+                
+                // 更新最后归档日期
+                storage.set('lastArchiveDate', today);
+            }
+        }
+
+        // 获取当前周标识（格式：2024-W01）
+        function getWeekKey(date) {
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return `${d.getFullYear()}-W${weekNo.toString().padStart(2, '0')}`;
+        }
+
+        // 获取周的起止日期
+        function getWeekRange(weekKey) {
+            const [year, weekStr] = weekKey.split('-W');
+            const week = parseInt(weekStr);
+            const yearStart = new Date(year, 0, 1);
+            const dayOffset = yearStart.getDay() || 7;
+            const firstMonday = new Date(yearStart);
+            firstMonday.setDate(yearStart.getDate() + (8 - dayOffset) % 7);
+            const startDate = new Date(firstMonday);
+            startDate.setDate(firstMonday.getDate() + (week - 1) * 7);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+            return {
+                startDate: startDate.toLocaleDateString('zh-CN'),
+                endDate: endDate.toLocaleDateString('zh-CN')
+            };
+        }
+
+        // 生成本周汇总
+        function generateSummary() {
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const records = Object.values(dailyRecords).sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (records.length === 0) {
+                showToast('暂无记录可汇总');
+                return;
+            }
+            
+            const summaryCard = document.getElementById('summary-card');
+            const summaryContent = document.getElementById('summary-content');
+            
+            const recentRecords = records.slice(0, 7);
+            const allThoughts = recentRecords.map(r => r.thoughts).filter(Boolean).join('；');
+            const allFeelings = recentRecords.map(r => r.feelings).filter(Boolean).join('；');
+            
+            summaryContent.innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <strong style="color: var(--primary);">记录次数：</strong>${records.length} 次
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong style="color: var(--primary);">近期想法：</strong><br>
+                    <span style="color: var(--secondary-text); font-size: 14px;">${allThoughts || '无'}</span>
+                </div>
+                <div>
+                    <strong style="color: var(--primary);">情绪概览：</strong><br>
+                    <span style="color: var(--secondary-text); font-size: 14px;">${allFeelings || '无'}</span>
+                </div>
+            `;
+            
+            summaryCard.style.display = 'block';
+            
+            // 自动归档到周历史记录
+            archiveWeeklyReflection(recentRecords, summaryContent.innerText);
+            
+            showToast('汇总已生成并归档');
+        }
+
+        // 归档周反思记录
+        function archiveWeeklyReflection(records, summaryText) {
+            const now = new Date();
+            const weekKey = getWeekKey(now);
+            const weekRange = getWeekRange(weekKey);
+            
+            // 获取现有的周归档
+            let weeklyArchives = storage.get('reflectWeeklyArchives') || {};
+            
+            // 计算周数
+            const weekNumber = parseInt(weekKey.split('-W')[1]);
+            
+            // 创建或更新本周归档
+            weeklyArchives[weekKey] = {
+                weekKey: weekKey,
+                weekNumber: weekNumber,
+                startDate: weekRange.startDate,
+                endDate: weekRange.endDate,
+                archivedAt: Date.now(),
+                records: records.map(r => ({
+                    date: r.date,
+                    thoughts: r.thoughts,
+                    feelings: r.feelings,
+                    block: r.block
+                })),
+                summary: summaryText,
+                recordCount: records.length
+            };
+            
+            // 保存归档
+            storage.set('reflectWeeklyArchives', weeklyArchives);
+            
+            // 标记这些记录已归档（可选：从 dailyRecords 中移除或标记）
+            // 这里我们选择保留 dailyRecords 中的记录，但标记它们已归档
+            const dailyRecords = storage.get('dailyRecords') || {};
+            records.forEach(r => {
+                if (dailyRecords[r.date]) {
+                    dailyRecords[r.date].archivedToWeekly = weekKey;
+                    dailyRecords[r.date].archivedAt = Date.now();
+                }
+            });
+            storage.set('dailyRecords', dailyRecords);
+        }
+
+        // 复制给AI分析
+        function copyForAI() {
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const records = Object.values(dailyRecords).sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (records.length === 0) {
+                showToast('暂无记录可复制');
+                return;
+            }
+            
+            const recentRecords = records.slice(0, 7);
+            let text = '【3R记录法 - 近期记录】\n\n';
+            
+            recentRecords.forEach((r) => {
+                text += `【${r.date}】\n`;
+                if (r.thoughts) text += `想法：${r.thoughts}\n`;
+                if (r.feelings) text += `感受：${r.feelings}\n`;
+                if (r.block) text += `卡点：${r.block}\n`;
+                text += '\n';
+            });
+            
+            text += '请帮我分析这些记录中的思维模式和情绪规律，并给出建议。';
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('已复制到剪贴板');
+            }).catch(() => {
+                showToast('复制失败，请手动复制');
+            });
+        }
+
+        // 复制AI分析问题
+        function copyAIQuestions() {
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const records = Object.values(dailyRecords).sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            let text = '【3R记录法 - AI分析请求】\n\n';
+            
+            if (records.length > 0) {
+                const recentRecords = records.slice(0, 7);
+                text += '以下是我的近期记录：\n\n';
+                recentRecords.forEach((r) => {
+                    text += `【${r.date}】\n`;
+                    if (r.thoughts) text += `想法：${r.thoughts}\n`;
+                    if (r.feelings) text += `感受：${r.feelings}\n`;
+                    if (r.block) text += `卡点：${r.block}\n`;
+                    text += '\n';
+                });
+                text += '\n';
+            }
+            
+            text += '请帮我总结两种规律：\n\n';
+            text += '1. 你在我的思维方式里看到了什么规律？\n';
+            text += '2. 我在哪里阻碍了自己？\n\n';
+            text += '请基于以上记录给出深度分析和建议。';
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('已复制到剪贴板');
+            }).catch(() => {
+                showToast('复制失败，请手动复制');
+            });
+        }
+
+        // 保存规律记录
+        function savePatternRecord() {
+            const patternContent = document.getElementById('pattern-record').value.trim();
+            
+            if (!patternContent) {
+                showToast('请输入规律内容');
+                return;
+            }
+            
+            const today = new Date().toLocaleDateString('zh-CN');
+            let patternRecords = storage.get('patternRecords') || {};
+            
+            // 按日期存储规律记录
+            if (!patternRecords[today]) {
+                patternRecords[today] = [];
+            }
+            
+            patternRecords[today].push({
+                content: patternContent,
+                createdAt: Date.now()
+            });
+            
+            storage.set('patternRecords', patternRecords);
+            showToast('规律记录已保存');
+        }
+
+        // 加载规律记录
+        function loadPatternRecord() {
+            const today = new Date().toLocaleDateString('zh-CN');
+            const patternRecords = storage.get('patternRecords') || {};
+            const todayPatterns = patternRecords[today];
+            
+            // 如果有今天的记录，显示最新的一条
+            if (todayPatterns && todayPatterns.length > 0) {
+                const latestPattern = todayPatterns[todayPatterns.length - 1];
+                document.getElementById('pattern-record').value = latestPattern.content || '';
+            }
+        }
+
+        // 复制本周汇总
+        function copyWeeklySummary() {
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const records = Object.values(dailyRecords).sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (records.length === 0) {
+                showToast('暂无记录可复制');
+                return;
+            }
+            
+            const recentRecords = records.slice(0, 7);
+            let text = '【3R记录法 - 本周汇总】\n\n';
+            text += `记录时间：${new Date().toLocaleDateString('zh-CN')}\n`;
+            text += `记录次数：${records.length} 次\n\n`;
+            text += '━━━━━━━━━━━━━━━━\n\n';
+            
+            recentRecords.forEach((r) => {
+                text += `【${r.date}】\n`;
+                if (r.thoughts) text += `💭 想法：${r.thoughts}\n`;
+                if (r.feelings) text += `💚 感受：${r.feelings}\n`;
+                if (r.block) text += `🚧 卡点：${r.block}\n`;
+                text += '\n';
+            });
+            
+            text += '━━━━━━━━━━━━━━━━\n';
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('本周汇总已复制');
+            }).catch(() => {
+                showToast('复制失败，请手动复制');
+            });
+        }
+
+        // 切换 Day 卡片展开/收起
+        function toggleDayCard(day) {
+            const card = document.querySelector('.day-card-item[data-day="' + day + '"]');
+            card.classList.toggle('expanded');
+        }
+
+        // 切换待办完成状态
+        function toggleTodo(day) {
+            const card = document.querySelector('.day-card-item[data-day="' + day + '"]');
+            card.classList.toggle('completed');
+            saveTodos();
+            updateProgress();
+        }
+
+        // 自动拆分步骤
+        function autoSplitSteps() {
+            const pasteText = document.getElementById('steps-paste-area').value.trim();
+            
+            if (!pasteText) {
+                showToast('请先粘贴步骤描述');
+                return;
+            }
+            
+            let steps = [];
+            const numberPattern = /(?:^|\n)\s*(?:\d+[.．、]|第[一二三四五六七八九十]+步|day\s*\d+|第\d+天)[\s:]*/i;
+            
+            if (numberPattern.test(pasteText)) {
+                steps = pasteText.split(numberPattern).filter(s => s.trim());
+            } else {
+                steps = pasteText.split(/[。！？\n]+/).filter(s => s.trim());
+            }
+            
+            steps = steps.map(step => {
+                step = step.trim().replace(/^[\s,，;；:]+|[\s,，;；:]+$/g, '');
+                if (step.length > 30) step = step.substring(0, 28) + '...';
+                return step;
+            }).filter(s => s.length > 0);
+            
+            steps = steps.slice(0, 7);
+            
+            for (let i = 0; i < 7; i++) {
+                const input = document.getElementById('todo-' + (i + 1));
+                input.value = steps[i] || '';
+            }
+            
+            document.getElementById('steps-paste-area').value = '';
+            saveTodos();
+            updateProgress();
+            showToast(`已生成 ${steps.length} 条步骤`);
+        }
+
+        // 保存待办列表
+        function saveTodos() {
+            const todos = [];
+            for (let i = 1; i <= 7; i++) {
+                const text = document.getElementById('todo-' + i).value;
+                const completed = document.querySelector('.day-card-item[data-day="' + i + '"]').classList.contains('completed');
+                todos.push({ text, completed });
+            }
+            storage.set('todos', todos);
+        }
+
+        // 加载待办列表
+        function loadTodos() {
+            const todos = storage.get('todos') || [];
+            for (let i = 0; i < 7; i++) {
+                const todo = todos[i] || { text: '', completed: false };
+                const input = document.getElementById('todo-' + (i + 1));
+                const card = document.querySelector('.day-card-item[data-day="' + (i + 1) + '"]');
+                if (input) input.value = todo.text || '';
+                if (card && todo.completed) card.classList.add('completed');
+            }
+            updateProgress();
+        }
+
+        // 更新进度提示
+        function updateProgress() {
+            let completedCount = 0;
+            for (let i = 1; i <= 7; i++) {
+                const card = document.querySelector('.day-card-item[data-day="' + i + '"]');
+                if (card && card.classList.contains('completed')) completedCount++;
+            }
+            const hint = document.getElementById('progress-hint');
+            if (hint) hint.textContent = `完成进度：${completedCount} / 7`;
+        }
+
+        // 保存重塑目标
+        function saveRewire() {
+            const task = document.getElementById('rewire-task').value;
+            if (!task) {
+                showToast('请填写本周任务');
+                return;
+            }
+            const todos = [];
+            for (let i = 1; i <= 7; i++) {
+                const text = document.getElementById('todo-' + i).value;
+                const completed = document.querySelector('.day-card-item[data-day="' + i + '"]').classList.contains('completed');
+                todos.push({ text, completed });
+            }
+            storage.set('rewire', { task, todos, date: new Date().toLocaleDateString('zh-CN') });
+            showToast('目标已保存');
+        }
+
+        // 选择执行状态
+        let logStatus = null;
+        let lastChoice = null;
+        function selectChoice(btn, choice) {
+            const isSameChoice = lastChoice === choice;
+            
+            // 移除所有按钮的选中状态和动画类
+            document.querySelectorAll('.choice-btn').forEach(b => {
+                b.classList.remove('selected', 'yes-animated', 'no-animated');
+            });
+            
+            // 添加选中状态
+            btn.classList.add('selected');
+            
+            // 仅在状态切换时播放动画
+            if (!isSameChoice) {
+                if (choice === 'yes') {
+                    // 延迟添加动画类，确保描边动画先开始
+                    setTimeout(() => {
+                        btn.classList.add('yes-animated');
+                    }, 50);
+                } else if (choice === 'no') {
+                    // 延迟添加动画类，确保描边动画先开始
+                    setTimeout(() => {
+                        btn.classList.add('no-animated');
+                    }, 50);
+                }
+            }
+            
+            logStatus = choice;
+            lastChoice = choice;
+        }
+
+        // 保存日志
+        function saveLog() {
+            if (!logStatus) {
+                showToast('请选择今日执行状态');
+                return;
+            }
+            const result = document.getElementById('log-result').value;
+            const feedback = document.getElementById('log-feedback').value;
+            const log = {
+                date: new Date().toLocaleDateString('zh-CN'),
+                status: logStatus,
+                result,
+                feedback,
+                timestamp: Date.now()
+            };
+            let logs = storage.get('logs') || [];
+            logs.unshift(log);
+            storage.set('logs', logs);
+            document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('log-result').value = '';
+            document.getElementById('log-feedback').value = '';
+            logStatus = null;
+            showToast('日志已保存');
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('record-menu');
+            const menuBtn = document.querySelector('.nav-menu');
+            if (menu && !menu.contains(e.target) && !menuBtn.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // 圆点导航
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.addEventListener('click', function() {
+                const page = this.dataset.page;
+                const pageNames = ['home', 'record', 'reflect', 'rewire', 'log'];
+                const index = pageNames.indexOf(page);
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-' + page).classList.add('active');
+                document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.nav-item').forEach((item, i) => {
+                    item.classList.toggle('active', i === index);
+                });
+            });
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 检查并归档每日记录（凌晨5点自动归档并清空）
+            archiveDailyRecord();
+            
+            // 加载今日记录
+            loadTodayRecord();
+            
+            // 加载规律记录
+            loadPatternRecord();
+            
+            // 加载首页随机文案
+            loadHomeQuote();
+            
+            // 加载待办列表
+            loadTodos();
+            
+            // 加载已保存的重塑目标
+            const rewire = storage.get('rewire');
+            if (rewire) {
+                document.getElementById('rewire-task').value = rewire.task || '';
+            }
+        });
+
+        // 日历功能
+        let currentCalendarDate = new Date();
+
+        // 渲染日历
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            // 更新月份标题
+            document.getElementById('calendar-month').textContent = 
+                `${year}年${month + 1}月`;
+            
+            // 获取日历网格
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            
+            // 获取当月第一天和最后一天
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startDayOfWeek = firstDay.getDay(); // 0 = 周日
+            
+            // 获取上个月的日期（用于填充开头）
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            
+            // 获取今日日期
+            const today = new Date();
+            const todayStr = today.toLocaleDateString('zh-CN');
+            
+            // 获取所有记录
+            const dailyRecords = storage.get('dailyRecords') || {};
+            
+            // 填充上个月的日期
+            for (let i = startDayOfWeek - 1; i >= 0; i--) {
+                const day = prevMonthLastDay - i;
+                const dayEl = createDayElement(day, true, false, false, null);
+                grid.appendChild(dayEl);
+            }
+            
+            // 填充当月的日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = date.toLocaleDateString('zh-CN');
+                const isToday = dateStr === todayStr;
+                const hasRecord = dailyRecords[dateStr] && 
+                    (dailyRecords[dateStr].thoughts || dailyRecords[dateStr].feelings || dailyRecords[dateStr].block);
+                
+                const dayEl = createDayElement(day, false, isToday, hasRecord, dateStr);
+                grid.appendChild(dayEl);
+            }
+            
+            // 填充下个月的日期（补全网格）
+            const totalCells = grid.children.length;
+            const remainingCells = 42 - totalCells; // 6行 x 7列 = 42
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayEl = createDayElement(day, true, false, false, null);
+                grid.appendChild(dayEl);
+            }
+        }
+
+        // 创建日期元素
+        function createDayElement(day, isOtherMonth, isToday, hasRecord, dateStr) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            
+            if (isOtherMonth) {
+                dayEl.classList.add('other-month');
+            }
+            if (isToday) {
+                dayEl.classList.add('today');
+            }
+            if (hasRecord) {
+                dayEl.classList.add('recorded');
+            }
+            
+            dayEl.innerHTML = `
+                <span class="calendar-day-number">${day}</span>
+                ${hasRecord ? '<div class="calendar-day-dot"></div>' : ''}
+            `;
+            
+            if (dateStr) {
+                dayEl.onclick = () => showDayDetail(dateStr);
+            }
+            
+            return dayEl;
+        }
+
+        // 切换月份
+        function changeMonth(delta) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        // 显示日期详情
+        function showDayDetail(dateStr) {
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const record = dailyRecords[dateStr];
+            
+            document.getElementById('modal-date').textContent = dateStr;
+            const modalBody = document.getElementById('modal-body');
+            
+            if (!record || (!record.thoughts && !record.feelings && !record.block)) {
+                modalBody.innerHTML = `
+                    <div class="modal-empty">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        <div>该日暂无记录</div>
+                    </div>
+                `;
+            } else {
+                modalBody.innerHTML = `
+                    ${record.thoughts ? `
+                        <div class="modal-section">
+                            <div class="modal-section-title">我的想法</div>
+                            <div class="modal-section-content">${escapeHtml(record.thoughts)}</div>
+                        </div>
+                    ` : ''}
+                    ${record.feelings ? `
+                        <div class="modal-section">
+                            <div class="modal-section-title">情绪感受</div>
+                            <div class="modal-section-content">${escapeHtml(record.feelings)}</div>
+                        </div>
+                    ` : ''}
+                    ${record.block ? `
+                        <div class="modal-section">
+                            <div class="modal-section-title">卡点/疑问</div>
+                            <div class="modal-section-content">${escapeHtml(record.block)}</div>
+                        </div>
+                    ` : ''}
+                `;
+            }
+            
+            document.getElementById('calendar-modal').classList.add('show');
+        }
+
+        // 关闭日期详情弹窗
+        function closeCalendarModal() {
+            document.getElementById('calendar-modal').classList.remove('show');
+        }
+
+        // 日历菜单功能
+        function toggleCalendarMenu() {
+            const menu = document.getElementById('calendar-menu');
+            menu.classList.toggle('show');
+        }
+
+        // 显示文案管理页面
+        function showQuoteManagePage() {
+            document.getElementById('calendar-menu').classList.remove('show');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-quote-manage').classList.add('active');
+            loadQuoteList();
+        }
+
+        // 返回日历页面
+        function goBackToCalendar() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-calendar').classList.add('active');
+        }
+
+        // 日志菜单功能
+        function toggleLogMenu() {
+            const menu = document.getElementById('log-menu');
+            menu.classList.toggle('show');
+        }
+
+        // 显示日志历史记录页面
+        function showLogHistoryPage() {
+            document.getElementById('log-menu').classList.remove('show');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-log-history').classList.add('active');
+            loadLogHistory();
+        }
+
+        // 返回日志页面
+        function goBackToLog() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-log').classList.add('active');
+        }
+
+        // 加载日志历史记录
+        function loadLogHistory() {
+            const logs = storage.get('logs') || [];
+            const historyList = document.getElementById('log-history-list');
+            
+            if (logs.length === 0) {
+                historyList.innerHTML = `
+                    <div class="history-empty">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        <div class="history-empty-text">暂无日志记录</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 按日期倒序排列
+            const sortedLogs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            historyList.innerHTML = sortedLogs.map((log, index) => {
+                const taskCount = log.tasks ? log.tasks.length : 0;
+                const completedCount = log.tasks ? log.tasks.filter(t => t.status === 'yes').length : 0;
+                
+                return `
+                    <div class="history-item" data-index="${index}" onclick="showLogDetail(${index})">
+                        <div class="history-item-header">
+                            <div class="history-date">
+                                <div class="history-date-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="history-date-text">${log.date}</div>
+                                    <div class="history-date-sub">${completedCount}/${taskCount} 项完成 · ${log.result ? '已记录反馈' : '无反馈'}</div>
+                                </div>
+                            </div>
+                            <svg class="history-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 显示日志详情
+        function showLogDetail(index) {
+            const logs = storage.get('logs') || [];
+            const sortedLogs = [...logs].sort((a, b) => new Date(b.date) - new Date(a.date));
+            const log = sortedLogs[index];
+            
+            if (!log) return;
+            
+            document.getElementById('log-detail-date').textContent = log.date;
+            const modalBody = document.getElementById('log-detail-body');
+            
+            let tasksHtml = '';
+            if (log.tasks && log.tasks.length > 0) {
+                tasksHtml = log.tasks.map(task => `
+                    <div class="modal-section">
+                        <div class="modal-section-title">${task.text}</div>
+                        <div class="modal-section-content">
+                            <span style="color: ${task.status === 'yes' ? 'var(--primary)' : '#e57373'}; font-weight: 500;">
+                                ${task.status === 'yes' ? '✓ 能' : '○ 不能'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            modalBody.innerHTML = `
+                ${tasksHtml}
+                ${log.result ? `
+                    <div class="modal-section">
+                        <div class="modal-section-title">执行结果与感受</div>
+                        <div class="modal-section-content">${escapeHtml(log.result)}</div>
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('log-detail-modal').classList.add('show');
+        }
+
+        // 关闭日志详情弹窗
+        function closeLogDetailModal() {
+            document.getElementById('log-detail-modal').classList.remove('show');
+        }
+
+        // 添加文案
+        function addQuote() {
+            const text = document.getElementById('new-quote-text').value.trim();
+            if (!text) {
+                showToast('请输入文案内容');
+                return;
+            }
+
+            let quotes = storage.get('quotes') || [];
+            quotes.push({
+                id: Date.now(),
+                text: text,
+                createdAt: Date.now()
+            });
+            storage.set('quotes', quotes);
+
+            document.getElementById('new-quote-text').value = '';
+            loadQuoteList();
+            showToast('文案已添加');
+        }
+
+        // 加载文案列表
+        function loadQuoteList() {
+            const quotes = storage.get('quotes') || [];
+            const listEl = document.getElementById('quote-list');
+
+            if (quotes.length === 0) {
+                listEl.innerHTML = `
+                    <div class="quote-empty">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        <div>暂无文案，请添加</div>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = quotes.map(quote => `
+                <div class="quote-item" data-id="${quote.id}">
+                    <div class="quote-text">${escapeHtml(quote.text)}</div>
+                    <div class="quote-actions">
+                        <button class="quote-btn quote-btn-edit" onclick="toggleEditQuote(${quote.id})">编辑</button>
+                        <button class="quote-btn quote-btn-delete" onclick="deleteQuote(${quote.id})">删除</button>
+                    </div>
+                    <div class="quote-edit-area" id="edit-area-${quote.id}">
+                        <textarea class="quote-edit-input" id="edit-input-${quote.id}">${escapeHtml(quote.text)}</textarea>
+                        <button class="btn btn-primary" onclick="saveEditQuote(${quote.id})" style="padding: 8px 16px; font-size: 13px;">保存</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 切换编辑区域显示
+        function toggleEditQuote(id) {
+            const editArea = document.getElementById(`edit-area-${id}`);
+            editArea.classList.toggle('show');
+        }
+
+        // 保存编辑的文案
+        function saveEditQuote(id) {
+            const newText = document.getElementById(`edit-input-${id}`).value.trim();
+            if (!newText) {
+                showToast('文案内容不能为空');
+                return;
+            }
+
+            let quotes = storage.get('quotes') || [];
+            const index = quotes.findIndex(q => q.id === id);
+            if (index !== -1) {
+                quotes[index].text = newText;
+                quotes[index].updatedAt = Date.now();
+                storage.set('quotes', quotes);
+                loadQuoteList();
+                showToast('文案已更新');
+            }
+        }
+
+        // 删除文案
+        function deleteQuote(id) {
+            if (!confirm('确定要删除这条文案吗？')) return;
+
+            let quotes = storage.get('quotes') || [];
+            quotes = quotes.filter(q => q.id !== id);
+            storage.set('quotes', quotes);
+            loadQuoteList();
+            showToast('文案已删除');
+        }
+
+        // 加载首页随机文案
+        function loadHomeQuote() {
+            const quotes = storage.get('quotes') || [];
+            const quoteContainer = document.getElementById('home-quote');
+            const quoteText = document.getElementById('home-quote-text');
+
+            if (quotes.length === 0) {
+                quoteContainer.style.display = 'none';
+                return;
+            }
+
+            // 获取今天应该显示的文案（基于日期）
+            const today = new Date();
+            const daySeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+            const index = daySeed % quotes.length;
+            const todayQuote = quotes[index];
+
+            quoteText.textContent = todayQuote.text;
+            quoteContainer.style.display = 'block';
+        }
+
+        // 注册 Service Worker 实现离线可用
+        if ('serviceWorker' in navigator) {
+            const swCode = `
+                self.addEventListener('install', e => {
+                    e.waitUntil(
+                        caches.open('3r-cache').then(cache => {
+                            return cache.addAll(['/']);
+                        })
+                    );
+                });
+                self.addEventListener('fetch', e => {
+                    e.respondWith(
+                        caches.match(e.request).then(response => {
+                            return response || fetch(e.request);
+                        })
+                    );
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(() => {
+                console.log('Service Worker 注册失败，但不影响使用');
+            });
+        }
+    </script>
+</body>
+</html>
