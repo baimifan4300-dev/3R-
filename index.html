@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#C8A97E">
+    <meta name="background-color" content="#F6F1EA">
+    <meta name="description" content="记录、反思、重塑 - 个人成长日记应用">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="3R Method">
     <title>3R Method - Record / Reflect / Rewire</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23C8A97E'/%3E%3Ctext x='96' y='120' font-size='80' text-anchor='middle' fill='white' font-family='Arial'%3E3R%3C/text%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -310,14 +318,20 @@
         .nav-item svg {
             width: 24px;
             height: 24px;
-            fill: var(--secondary-text);
+            fill: none;
             stroke: var(--secondary-text);
-            transition: all 0.3s ease;
+            stroke-width: 1.5px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.7;
+            transition: all 0.15s ease-out;
         }
 
         .nav-item.active svg {
             fill: var(--primary);
             stroke: var(--primary);
+            opacity: 1;
+            stroke-width: 2px;
         }
 
         .nav-item span {
@@ -1336,11 +1350,728 @@
             font-family: Georgia, serif;
         }
 
+        /* 底部弹窗（Bottom Sheet）样式 */
+        .bottom-sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .bottom-sheet-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px 24px 0 0;
+            padding: 24px 20px 32px;
+            box-shadow: 0 -8px 32px rgba(139, 119, 101, 0.2);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1001;
+        }
+
+        .bottom-sheet.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .bottom-sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--primary-light);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .bottom-sheet-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .bottom-sheet-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .bottom-sheet-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 16px;
+            background: rgba(200, 169, 126, 0.08);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(200, 169, 126, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bottom-sheet-item:hover {
+            background: rgba(200, 169, 126, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .bottom-sheet-item:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .bottom-sheet-item svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--primary);
+            filter: grayscale(100%) opacity(0.6);
+            transition: all 0.3s ease;
+        }
+
+        /* Emoji图标样式 */
+        .bottom-sheet-item .more-icon-emoji {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            filter: grayscale(100%) opacity(0.6);
+            transition: all 0.3s ease;
+        }
+
+        .bottom-sheet-item:hover .more-icon-emoji {
+            filter: grayscale(50%) opacity(0.8);
+            transform: scale(1.05);
+        }
+
+        .bottom-sheet-item:active .more-icon-emoji {
+            filter: grayscale(0%) opacity(1);
+            transform: scale(1.1);
+        }
+
+        /* 线性图标样式（stroke类型） */
+        .bottom-sheet-item svg[stroke="currentColor"] {
+            filter: grayscale(100%) opacity(0.5);
+            stroke: var(--secondary-text);
+        }
+
+        .bottom-sheet-item:hover svg {
+            filter: grayscale(50%) opacity(0.8);
+            transform: scale(1.05);
+        }
+
+        .bottom-sheet-item:hover svg[stroke="currentColor"] {
+            filter: grayscale(50%) opacity(0.7);
+            stroke: var(--primary);
+        }
+
+        .bottom-sheet-item:active svg {
+            filter: grayscale(0%) opacity(1);
+            transform: scale(1.1);
+        }
+
+        .bottom-sheet-item:active svg[stroke="currentColor"] {
+            filter: grayscale(0%) opacity(1);
+            stroke: var(--primary);
+        }
+
+        .bottom-sheet-item span {
+            font-size: 14px;
+            color: var(--secondary-text);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .bottom-sheet-item:hover span {
+            color: var(--text);
+        }
+
+        .bottom-sheet-item:active span {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .bottom-sheet-item small {
+            font-size: 11px;
+            color: var(--secondary-text);
+            opacity: 0.7;
+            margin-top: 2px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        /* 重塑历史记录样式 */
+        .rewire-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .rewire-history-item {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(200, 169, 126, 0.15);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .rewire-history-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 16px rgba(200, 169, 126, 0.15);
+        }
+
+        .rewire-history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+        }
+
+        .rewire-history-date {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rewire-history-date-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rewire-history-date-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .rewire-history-date-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .rewire-history-date-sub {
+            font-size: 12px;
+            color: var(--secondary-text);
+            margin-top: 2px;
+        }
+
+        .rewire-history-arrow {
+            width: 20px;
+            height: 20px;
+            fill: var(--secondary-text);
+            transition: transform 0.3s ease;
+        }
+
+        .rewire-history-item.expanded .rewire-history-arrow {
+            transform: rotate(180deg);
+        }
+
+        .rewire-history-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .rewire-history-item.expanded .rewire-history-content {
+            max-height: 600px;
+        }
+
+        .rewire-history-content-inner {
+            padding: 0 20px 20px;
+        }
+
+        .rewire-history-section {
+            margin-bottom: 16px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+        }
+
+        .rewire-history-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .rewire-history-section-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .rewire-history-section-content {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.7;
+            word-break: break-word;
+        }
+
+        .rewire-history-task-title {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        /* 情绪标签样式 */
+        .emotion-section {
+            margin-bottom: 20px;
+        }
+
+        .emotion-label {
+            display: block;
+            font-size: 14px;
+            color: var(--secondary-text);
+            margin-bottom: 12px;
+            font-weight: 400;
+        }
+
+        .emotion-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .emotion-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+
+        .emotion-tag:hover {
+            transform: translateY(-2px);
+        }
+
+        .emotion-tag.selected {
+            border-color: currentColor;
+            font-weight: 600;
+        }
+
+        .emotion-tag .emoji {
+            font-size: 16px;
+        }
+
+        /* 情绪标签展示样式 */
+        .emotion-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0;
+        }
+
+        .emotion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* 情绪筛选样式 */
+        .emotion-filter {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(200, 169, 126, 0.15);
+        }
+
+        .emotion-filter-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .emotion-filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .emotion-filter-tag {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+            border: 2px solid transparent;
+        }
+
+        .emotion-filter-tag:hover {
+            transform: translateY(-1px);
+        }
+
+        .emotion-filter-tag.active {
+            border-color: currentColor;
+            font-weight: 600;
+        }
+
+        /* 情绪颜色定义 */
+        .emotion-happy { background: rgba(255, 213, 79, 0.2); color: #FFD54F; }
+        .emotion-excited { background: rgba(255, 138, 101, 0.2); color: #FF8A65; }
+        .emotion-calm { background: rgba(129, 199, 132, 0.2); color: #81C784; }
+        .emotion-silent { background: rgba(176, 190, 197, 0.2); color: #B0BEC5; }
+        .emotion-anxious { background: rgba(100, 181, 246, 0.2); color: #64B5F6; }
+        .emotion-sad { background: rgba(149, 117, 205, 0.2); color: #9575CD; }
+        .emotion-procrastination { background: rgba(240, 98, 146, 0.2); color: #F06292; }
+        .emotion-doubt { background: rgba(144, 164, 174, 0.2); color: #90A4AE; }
+
+        /* 数据统计仪表盘样式 */
+        .stats-dashboard {
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            border: 1px solid rgba(200, 169, 126, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .stats-card:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(200, 169, 126, 0.1);
+        }
+
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stats-icon svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+        }
+
+        .stats-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .stats-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .stats-label {
+            font-size: 12px;
+            color: var(--secondary-text);
+            font-weight: 500;
+        }
+
+        .stats-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(200, 169, 126, 0.2);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .stats-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        .stats-emotion-card {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .stats-emotion-card .stats-icon {
+            margin-bottom: 8px;
+        }
+
+        .stats-emotion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .stats-emotion-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-emotion-emoji {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .stats-emotion-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(200, 169, 126, 0.15);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .stats-emotion-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .stats-emotion-percent {
+            font-size: 11px;
+            color: var(--secondary-text);
+            font-weight: 500;
+            min-width: 32px;
+            text-align: right;
+        }
+
+        .stats-empty {
+            font-size: 12px;
+            color: var(--secondary-text);
+            font-style: italic;
+        }
+
+        /* 专注模式样式 */
+        #page-focus-mode {
+            background: #FAFAFA;
+            padding: 0;
+        }
+
+        #page-focus-mode.active {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+        }
+
+        #page-focus-mode .bottom-nav {
+            display: none !important;
+        }
+
+        .focus-mode-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .focus-mode-header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .focus-mode-back {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .focus-mode-back:hover {
+            background: rgba(200, 169, 126, 0.1);
+        }
+
+        .focus-mode-back svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--secondary-text);
+            transition: all 0.2s ease;
+        }
+
+        .focus-mode-back:hover svg {
+            stroke: var(--text);
+        }
+
+        .focus-mode-menu-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .focus-mode-menu-btn:hover {
+            background: rgba(200, 169, 126, 0.1);
+        }
+
+        .focus-mode-menu-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--secondary-text);
+            transition: all 0.2s ease;
+        }
+
+        .focus-mode-menu-btn:hover svg {
+            stroke: var(--text);
+        }
+
+        .focus-mode-menu {
+            position: absolute;
+            top: 56px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            min-width: 180px;
+            padding: 8px 0;
+            display: none;
+            z-index: 1001;
+        }
+
+        .focus-mode-menu.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .focus-mode-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .focus-mode-menu-item:hover {
+            background: rgba(200, 169, 126, 0.1);
+        }
+
+        .focus-mode-menu-item svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--secondary-text);
+            flex-shrink: 0;
+        }
+
+        .focus-mode-menu-divider {
+            height: 1px;
+            background: rgba(200, 169, 126, 0.2);
+            margin: 8px 0;
+        }
+
+        .focus-mode-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 24px 40px;
+            overflow: hidden;
+        }
+
+        .focus-mode-textarea {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--text);
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            caret-color: var(--primary);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .focus-mode-textarea::placeholder {
+            color: var(--secondary-text);
+            opacity: 0.6;
+        }
+
         /* 响应式 */
         @media (max-width: 480px) {
             .app-container { padding: 20px 16px; }
             .main-title { font-size: 36px; }
             .card { padding: 24px 20px; }
+            .focus-mode-content { padding: 16px 20px 32px; }
+            .focus-mode-input { font-size: 17px; }
         }
     </style>
 </head>
@@ -1365,7 +2096,7 @@
                     <div class="dot" data-page="record"></div>
                     <div class="dot" data-page="reflect"></div>
                     <div class="dot" data-page="rewire"></div>
-                    <div class="dot" data-page="log"></div>
+                    <div class="dot" data-page="more" onclick="showMoreSheet()"></div>
                 </div>
             </div>
         </div>
@@ -1427,6 +2158,18 @@
                     <p class="step-desc">回顾过往，看见成长</p>
                 </div>
                 <div class="card">
+                    <!-- 情绪筛选 -->
+                    <div class="emotion-filter">
+                        <div class="emotion-filter-title">按情绪筛选</div>
+                        <div class="emotion-filter-tags" id="emotion-filter-tags">
+                            <div class="emotion-filter-tag emotion-silent" onclick="toggleEmotionFilter('all')">
+                                <span class="emoji">📋</span>
+                                <span>全部</span>
+                            </div>
+                            <!-- 情绪标签将由JavaScript动态生成 -->
+                        </div>
+                    </div>
+                    
                     <div class="history-list" id="history-list">
                         <div class="history-empty">
                             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
@@ -1501,7 +2244,7 @@
             </div>
             <div class="content-area">
                 <div class="step-header">
-                    <div class="step-number">2</div>
+                    <div class="step-number">4</div>
                     <h2 class="step-title">Reflect</h2>
                     <p class="step-desc">回顾整理，看见模式</p>
                 </div>
@@ -1543,13 +2286,19 @@
                     <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
                 </button>
                 <span class="nav-title">重塑</span>
-                <button class="nav-menu" onclick="showMenu()">
+                <button class="nav-menu" onclick="toggleRewireMenu()">
                     <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
                 </button>
+                <div class="dropdown-menu" id="rewire-menu">
+                    <div class="dropdown-item" onclick="showRewireHistoryPage()">
+                        <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                        <span>历史记录</span>
+                    </div>
+                </div>
             </div>
             <div class="content-area">
                 <div class="step-header">
-                    <div class="step-number">3</div>
+                    <div class="step-number">2</div>
                     <h2 class="step-title">Rewire</h2>
                     <p class="step-desc">设定目标，重塑习惯</p>
                 </div>
@@ -1685,6 +2434,32 @@
             </div>
         </div>
 
+        <!-- 重塑历史记录页面 -->
+        <div class="page" id="page-rewire-history">
+            <div class="nav-bar">
+                <button class="nav-back" onclick="goBackToRewire()">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <span class="nav-title">重塑历史</span>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="content-area">
+                <div class="step-header">
+                    <div class="step-number">📚</div>
+                    <h2 class="step-title">任务历史</h2>
+                    <p class="step-desc">回顾过往，见证成长</p>
+                </div>
+                <div class="card">
+                    <div class="rewire-history-list" id="rewire-history-list">
+                        <div class="history-empty">
+                            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                            <div class="history-empty-text">暂无历史重塑任务</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 执行日志页面 -->
         <div class="page" id="page-log">
             <div class="nav-bar">
@@ -1704,7 +2479,7 @@
             </div>
             <div class="content-area">
                 <div class="step-header">
-                    <div class="step-number">4</div>
+                    <div class="step-number">3</div>
                     <h2 class="step-title">执行日志</h2>
                     <p class="step-desc">记录行动，追踪成长</p>
                 </div>
@@ -1754,10 +2529,6 @@
                     <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
                 </button>
                 <div class="dropdown-menu" id="calendar-menu">
-                    <div class="dropdown-item" onclick="showQuoteManagePage()">
-                        <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                        <span>首页文案</span>
-                    </div>
                 </div>
             </div>
             <div class="content-area">
@@ -1766,6 +2537,61 @@
                     <h2 class="step-title">记录日历</h2>
                     <p class="step-desc">时光印记，见证成长</p>
                 </div>
+
+                <!-- 数据统计仪表盘 -->
+                <div class="stats-dashboard" id="stats-dashboard">
+                    <div class="stats-grid">
+                        <!-- 本周记录次数 -->
+                        <div class="stats-card">
+                            <div class="stats-icon">
+                                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            <div class="stats-content">
+                                <div class="stats-value" id="stats-week-records">0</div>
+                                <div class="stats-label">本周记录</div>
+                            </div>
+                        </div>
+
+                        <!-- 连续打卡天数 -->
+                        <div class="stats-card">
+                            <div class="stats-icon">
+                                <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="stats-content">
+                                <div class="stats-value" id="stats-streak-days">0</div>
+                                <div class="stats-label">连续打卡</div>
+                            </div>
+                        </div>
+
+                        <!-- 重塑任务完成率 -->
+                        <div class="stats-card">
+                            <div class="stats-icon">
+                                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </div>
+                            <div class="stats-content">
+                                <div class="stats-value" id="stats-rewire-rate">0%</div>
+                                <div class="stats-label">任务完成</div>
+                                <div class="stats-progress-bar">
+                                    <div class="stats-progress-fill" id="stats-rewire-progress"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 情绪分布 -->
+                        <div class="stats-card stats-emotion-card">
+                            <div class="stats-icon">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                            </div>
+                            <div class="stats-content">
+                                <div class="stats-label">情绪分布</div>
+                                <div class="stats-emotion-list" id="stats-emotion-list">
+                                    <span class="stats-empty">暂无记录</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <!-- 月份切换 -->
                     <div class="calendar-header">
@@ -1903,34 +2729,151 @@
         <!-- 底部导航 -->
         <nav class="bottom-nav">
             <div class="nav-item active" onclick="showPage('home')">
-                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <svg viewBox="0 0 24 24" class="nav-icon-home">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
                 <span>首页</span>
             </div>
             <div class="nav-item" onclick="showPage('record')">
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <svg viewBox="0 0 24 24" class="nav-icon-record">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
                 <span>记录</span>
             </div>
-            <div class="nav-item" onclick="showPage('reflect')">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                <span>反思</span>
-            </div>
             <div class="nav-item" onclick="showPage('rewire')">
-                <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                <svg viewBox="0 0 24 24" class="nav-icon-rewire">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
                 <span>重塑</span>
             </div>
             <div class="nav-item" onclick="showPage('log')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="4" y="3" width="16" height="18" rx="2" ry="2"/>
-                    <line x1="8" y1="9" x2="16" y2="9"/>
-                    <line x1="8" y1="13" x2="16" y2="13"/>
+                <svg viewBox="0 0 24 24" class="nav-icon-log">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
                 <span>日志</span>
             </div>
-            <div class="nav-item" onclick="showPage('calendar')">
-                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
-                <span>日历</span>
+            <div class="nav-item" onclick="showMoreSheet()">
+                <svg viewBox="0 0 24 24" class="nav-icon-more">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="19" cy="12" r="1"/>
+                    <circle cx="5" cy="12" r="1"/>
+                </svg>
+                <span>更多</span>
             </div>
         </nav>
+
+        <!-- 更多底部弹窗 -->
+        <div class="bottom-sheet-overlay" id="more-sheet-overlay" onclick="closeMoreSheet()"></div>
+        <div class="bottom-sheet" id="more-sheet">
+            <div class="bottom-sheet-handle"></div>
+            <div class="bottom-sheet-title">更多功能</div>
+            <div class="bottom-sheet-grid">
+                <div class="bottom-sheet-item" onclick="navigateFromSheet('reflect')">
+                    <svg viewBox="0 0 24 24" class="more-icon-reflect">
+                        <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/>
+                        <path d="M9 21h6"/>
+                    </svg>
+                    <span>反思</span>
+                </div>
+                <div class="bottom-sheet-item" onclick="navigateFromSheet('calendar')">
+                    <svg viewBox="0 0 24 24" class="more-icon-calendar">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <span>日历</span>
+                </div>
+                <div class="bottom-sheet-item" onclick="backupLocalData()">
+                    <svg viewBox="0 0 24 24" class="more-icon-backup">
+                        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+                        <polyline points="8 12 12 16 16 12"/>
+                        <line x1="12" y1="8" x2="12" y2="16"/>
+                    </svg>
+                    <span>数据备份</span>
+                </div>
+                <div class="bottom-sheet-item" onclick="showQuoteManagePageFromMore()">
+                    <svg viewBox="0 0 24 24" class="more-icon-quotes">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                    <span>文案库</span>
+                </div>
+                <div class="bottom-sheet-item" onclick="enterFocusMode()">
+                    <div class="more-icon-emoji">📝</div>
+                    <span>专注模式</span>
+                    <small class="more-item-subtitle">沉浸式写日记 · 无干扰</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 专注模式页面 -->
+    <div class="page focus-mode-page" id="page-focus-mode">
+        <div class="focus-mode-header">
+            <button class="focus-mode-back" onclick="exitFocusMode()" title="退出专注模式">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                </svg>
+            </button>
+            <button class="focus-mode-menu-btn" onclick="toggleFocusModeMenu()" title="菜单">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="5" r="1"/>
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="12" cy="19" r="1"/>
+                </svg>
+            </button>
+            <div class="focus-mode-menu" id="focus-mode-menu">
+                <div class="focus-mode-menu-item" onclick="saveFocusModeContent(); showToast('已保存'); toggleFocusModeMenu();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    <span>保存当前内容</span>
+                </div>
+                <div class="focus-mode-menu-item" onclick="showFocusModeHistory(); toggleFocusModeMenu();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>查看历史记录</span>
+                </div>
+                <div class="focus-mode-menu-item" onclick="clearFocusModeContent(); toggleFocusModeMenu();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    <span>清空本页内容</span>
+                </div>
+                <div class="focus-mode-menu-divider"></div>
+                <div class="focus-mode-menu-item" onclick="exitFocusMode(); toggleFocusModeMenu();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>退出专注模式</span>
+                </div>
+            </div>
+        </div>
+        <div class="focus-mode-container">
+            <textarea 
+                class="focus-mode-textarea" 
+                id="focus-mode-input" 
+                placeholder="此刻的你，在想什么…"
+                autofocus
+            ></textarea>
+        </div>
     </div>
 
     <!-- Toast 提示 -->
@@ -1947,6 +2890,21 @@
                 localStorage.setItem('3r_' + key, JSON.stringify(value));
             }
         };
+
+        // 情绪标签配置
+        const emotionConfig = [
+            { id: 'happy', name: '开心', emoji: '😊', color: '#FFD54F', className: 'emotion-happy' },
+            { id: 'excited', name: '兴奋', emoji: '🤩', color: '#FF8A65', className: 'emotion-excited' },
+            { id: 'calm', name: '平静', emoji: '😌', color: '#81C784', className: 'emotion-calm' },
+            { id: 'silent', name: '沉默', emoji: '😶', color: '#B0BEC5', className: 'emotion-silent' },
+            { id: 'anxious', name: '焦虑', emoji: '😣', color: '#64B5F6', className: 'emotion-anxious' },
+            { id: 'sad', name: '低落', emoji: '😔', color: '#9575CD', className: 'emotion-sad' },
+            { id: 'procrastination', name: '拖延', emoji: '😫', color: '#F06292', className: 'emotion-procrastination' },
+            { id: 'doubt', name: '自我怀疑', emoji: '🤔', color: '#90A4AE', className: 'emotion-doubt' }
+        ];
+
+        // 选中的情绪标签
+        let selectedEmotions = [];
 
         // 页面切换
         function showPage(pageName) {
@@ -1965,11 +2923,283 @@
             if (dotIndex >= 0) {
                 document.querySelectorAll('.dot')[dotIndex].classList.add('active');
             }
-            
+
             // 如果切换到日历页面，渲染日历
             if (pageName === 'calendar') {
                 renderCalendar();
             }
+        }
+
+        // 渲染情绪标签选择区
+        function renderEmotionTags() {
+            const emotionSection = document.createElement('div');
+            emotionSection.className = 'emotion-section';
+            emotionSection.innerHTML = `
+                <label class="emotion-label">我的情绪 (最多3个)</label>
+                <div class="emotion-tags" id="emotion-tags-container">
+                </div>
+            `;
+
+            const container = emotionSection.querySelector('#emotion-tags-container');
+            emotionConfig.forEach(emotion => {
+                const tag = document.createElement('div');
+                tag.className = `emotion-tag ${emotion.className}`;
+                tag.innerHTML = `
+                    <span class="emoji">${emotion.emoji}</span>
+                    <span>${emotion.name}</span>
+                `;
+                tag.onclick = () => toggleEmotionTag(emotion);
+                container.appendChild(tag);
+            });
+
+            // 插入到第三个输入框之后
+            const blockInput = document.getElementById('record-block');
+            blockInput.parentElement.parentElement.insertBefore(emotionSection, blockInput.parentElement.nextElementSibling);
+        }
+
+        // 切换情绪标签
+        function toggleEmotionTag(emotion) {
+            const index = selectedEmotions.findIndex(e => e.id === emotion.id);
+            
+            if (index > -1) {
+                // 取消选择
+                selectedEmotions.splice(index, 1);
+            } else {
+                // 选择（最多3个）
+                if (selectedEmotions.length >= 3) {
+                    showToast('最多选择3个情绪标签');
+                    return;
+                }
+                selectedEmotions.push(emotion);
+            }
+
+            // 更新UI
+            updateEmotionTagsUI();
+        }
+
+        // 更新情绪标签UI
+        function updateEmotionTagsUI() {
+            const tags = document.querySelectorAll('.emotion-tag');
+            tags.forEach(tag => {
+                const emoji = tag.querySelector('.emoji').textContent;
+                const emotion = emotionConfig.find(e => e.emoji === emoji);
+                if (emotion) {
+                    if (selectedEmotions.some(e => e.id === emotion.id)) {
+                        tag.classList.add('selected');
+                    } else {
+                        tag.classList.remove('selected');
+                    }
+                }
+            });
+        }
+
+        // 显示情绪标签
+        function renderEmotionBadges(emotions) {
+            if (!emotions || emotions.length === 0) return '';
+            
+            return `
+                <div class="emotion-badges">
+                    ${emotions.map(emotion => {
+                        const config = emotionConfig.find(e => e.id === emotion.id || e.name === emotion.name);
+                        const className = config ? config.className : 'emotion-silent';
+                        const emoji = config ? config.emoji : '😐';
+                        const name = emotion.name || config?.name || '未知';
+                        return `
+                            <span class="emotion-badge ${className}">
+                                <span class="emoji">${emoji}</span>
+                                <span>${name}</span>
+                            </span>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // 情绪筛选相关
+        let activeEmotionFilters = [];
+
+        // 渲染情绪筛选标签
+        function renderEmotionFilterTags() {
+            const container = document.getElementById('emotion-filter-tags');
+            if (!container) return;
+
+            // 清空现有标签（保留全部按钮）
+            const allButton = container.querySelector('.emotion-filter-tag:first-child');
+            container.innerHTML = '';
+            if (allButton) {
+                container.appendChild(allButton);
+            }
+
+            // 添加情绪标签
+            emotionConfig.forEach(emotion => {
+                const tag = document.createElement('div');
+                tag.className = `emotion-filter-tag ${emotion.className}`;
+                tag.innerHTML = `
+                    <span class="emoji">${emotion.emoji}</span>
+                    <span>${emotion.name}</span>
+                `;
+                tag.onclick = () => toggleEmotionFilter(emotion.id);
+                container.appendChild(tag);
+            });
+
+            // 更新活跃状态
+            updateEmotionFilterUI();
+        }
+
+        // 切换情绪筛选
+        function toggleEmotionFilter(emotionId) {
+            if (emotionId === 'all') {
+                activeEmotionFilters = [];
+            } else {
+                const index = activeEmotionFilters.indexOf(emotionId);
+                if (index > -1) {
+                    activeEmotionFilters.splice(index, 1);
+                } else {
+                    activeEmotionFilters.push(emotionId);
+                }
+            }
+            updateEmotionFilterUI();
+            loadHistory();
+        }
+
+        // 更新情绪筛选UI
+        function updateEmotionFilterUI() {
+            const tags = document.querySelectorAll('.emotion-filter-tag');
+            tags.forEach(tag => {
+                tag.classList.remove('active');
+            });
+
+            // 标记全部按钮
+            const allButton = tags[0];
+            if (activeEmotionFilters.length === 0) {
+                allButton.classList.add('active');
+            }
+
+            // 标记选中的情绪
+            emotionConfig.forEach(emotion => {
+                if (activeEmotionFilters.includes(emotion.id)) {
+                    const tag = document.querySelector(`.emotion-filter-tag.${emotion.className}`);
+                    if (tag) {
+                        tag.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        // 检查记录是否匹配情绪筛选
+        function isRecordMatchEmotionFilter(record) {
+            if (activeEmotionFilters.length === 0) return true;
+            if (!record.emotions || record.emotions.length === 0) return false;
+            
+            return record.emotions.some(emotion => 
+                activeEmotionFilters.includes(emotion.id) || 
+                activeEmotionFilters.includes(emotion.name)
+            );
+        }
+
+        // 显示更多底部弹窗
+        function showMoreSheet() {
+            document.getElementById('more-sheet-overlay').classList.add('show');
+            document.getElementById('more-sheet').classList.add('show');
+        }
+
+        // 关闭更多底部弹窗
+        function closeMoreSheet() {
+            document.getElementById('more-sheet-overlay').classList.remove('show');
+            document.getElementById('more-sheet').classList.remove('show');
+        }
+
+        // 从弹窗导航到指定页面
+        function navigateFromSheet(pageName) {
+            closeMoreSheet();
+
+            // 延迟切换页面，等待弹窗关闭动画
+            setTimeout(() => {
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                document.getElementById('page-' + pageName).classList.add('active');
+
+                // 更新导航栏状态（更多按钮保持选中）
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                // 更多按钮是最后一个 nav-item
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems[navItems.length - 1].classList.add('active');
+
+                document.querySelectorAll('.dot').forEach(dot => {
+                    dot.classList.remove('active');
+                });
+                const dotIndex = ['home', 'record', 'reflect', 'rewire', 'log', 'calendar'].indexOf(pageName);
+                if (dotIndex >= 0) {
+                    document.querySelectorAll('.dot')[dotIndex].classList.add('active');
+                }
+
+                // 如果切换到日历页面，渲染日历
+                if (pageName === 'calendar') {
+                    renderCalendar();
+                }
+            }, 200);
+        }
+
+        // 数据备份功能
+        function backupLocalData() {
+            closeMoreSheet();
+
+            // 收集所有本地存储数据
+            const backupData = {
+                exportTime: new Date().toISOString(),
+                exportDate: new Date().toLocaleDateString('zh-CN'),
+                data: {}
+            };
+
+            // 遍历所有 localStorage 数据
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key) {
+                    try {
+                        const value = localStorage.getItem(key);
+                        // 尝试解析为 JSON，如果失败则保存原始字符串
+                        try {
+                            backupData.data[key] = JSON.parse(value);
+                        } catch {
+                            backupData.data[key] = value;
+                        }
+                    } catch (e) {
+                        console.warn('无法读取 key:', key, e);
+                    }
+                }
+            }
+
+            // 生成文件名：backup-YYYY-MM-DD.json
+            const now = new Date();
+            const dateStr = now.getFullYear() + '-' +
+                           String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                           String(now.getDate()).padStart(2, '0');
+            const filename = 'backup-' + dateStr + '.json';
+
+            // 创建 Blob 并下载
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            // 创建临时下载链接
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = filename;
+
+            // 触发下载
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+
+            // 清理
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+
+            // 显示提示
+            setTimeout(() => {
+                showToast('数据备份已下载');
+            }, 300);
         }
 
         // 返回首页
@@ -1991,6 +3221,105 @@
         // 显示菜单
         function showMenu() {
             showToast('菜单功能开发中');
+        }
+
+        // 切换重塑页面菜单
+        function toggleRewireMenu() {
+            const menu = document.getElementById('rewire-menu');
+            menu.classList.toggle('show');
+        }
+
+        // 显示重塑历史记录页面
+        function showRewireHistoryPage() {
+            document.getElementById('rewire-menu').classList.remove('show');
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page-rewire-history').classList.add('active');
+            loadRewireHistory();
+        }
+
+        // 返回重塑页面
+        function goBackToRewire() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page-rewire').classList.add('active');
+        }
+
+        // 加载重塑历史记录
+        function loadRewireHistory() {
+            const historyList = document.getElementById('rewire-history-list');
+            const history = storage.get('rewireHistory') || [];
+
+            if (history.length === 0) {
+                historyList.innerHTML = `
+                    <div class="history-empty">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        <div class="history-empty-text">暂无历史重塑任务</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 按时间倒序排列
+            const sortedHistory = [...history].sort((a, b) => b.id - a.id);
+
+            historyList.innerHTML = sortedHistory.map(item => {
+                const date = new Date(item.id);
+                const dateStr = date.toLocaleDateString('zh-CN');
+                const timeStr = date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+                // 构建7天步骤内容
+                let todosHtml = '';
+                if (item.todos && item.todos.length > 0) {
+                    const completedCount = item.todos.filter(t => t.completed).length;
+                    todosHtml = `
+                        <div class="rewire-history-section">
+                            <div class="rewire-history-section-title">7天步骤 (${completedCount}/7 完成)</div>
+                            <div class="rewire-history-section-content">
+                                ${item.todos.map((todo, index) => `
+                                    <div style="margin-bottom: 8px; ${todo.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
+                                        <strong>Day ${index + 1}:</strong> ${todo.text || '未设置'}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="rewire-history-item" onclick="toggleRewireHistoryItem(this)">
+                        <div class="rewire-history-header">
+                            <div class="rewire-history-date">
+                                <div class="rewire-history-date-icon">
+                                    <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="rewire-history-date-text">${dateStr}</div>
+                                    <div class="rewire-history-date-sub">${timeStr}</div>
+                                    <div class="rewire-history-task-title">${item.task || '无任务标题'}</div>
+                                </div>
+                            </div>
+                            <svg class="rewire-history-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                        </div>
+                        <div class="rewire-history-content">
+                            <div class="rewire-history-content-inner">
+                                <div class="rewire-history-section">
+                                    <div class="rewire-history-section-title">本周任务</div>
+                                    <div class="rewire-history-section-content">${item.task || '未设置'}</div>
+                                </div>
+                                ${todosHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 切换历史记录项展开/收起
+        function toggleRewireHistoryItem(item) {
+            item.classList.toggle('expanded');
         }
 
         // Toast 提示
@@ -2022,6 +3351,7 @@
                 thoughts,
                 feelings,
                 block,
+                emotions: selectedEmotions,
                 updatedAt: Date.now()
             };
             
@@ -2039,6 +3369,13 @@
                 document.getElementById('record-thoughts').value = todayRecord.thoughts || '';
                 document.getElementById('record-feelings').value = todayRecord.feelings || '';
                 document.getElementById('record-block').value = todayRecord.block || '';
+                
+                // 加载情绪标签
+                if (todayRecord.emotions) {
+                    selectedEmotions = todayRecord.emotions;
+                    // 延迟更新UI，确保标签已渲染
+                    setTimeout(updateEmotionTagsUI, 100);
+                }
             }
         }
 
@@ -2273,6 +3610,10 @@
             document.getElementById('record-menu').classList.remove('show');
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-history').classList.add('active');
+            
+            // 渲染情绪筛选标签
+            setTimeout(renderEmotionFilterTags, 100);
+            
             loadHistory();
         }
 
@@ -2288,9 +3629,9 @@
             const dailyRecords = storage.get('dailyRecords') || {};
             const today = new Date().toLocaleDateString('zh-CN');
             
-            // 过滤掉今天的记录，只显示历史记录
+            // 过滤掉今天的记录，只显示历史记录，并应用情绪筛选
             const dates = Object.keys(dailyRecords)
-                .filter(date => date !== today)
+                .filter(date => date !== today && isRecordMatchEmotionFilter(dailyRecords[date]))
                 .sort((a, b) => new Date(b) - new Date(a));
             
             if (dates.length === 0) {
@@ -2317,6 +3658,7 @@
                                 <div>
                                     <div class="history-date-text">${date}</div>
                                     <div class="history-date-sub">${dayOfWeek}</div>
+                                    ${renderEmotionBadges(record.emotions)}
                                 </div>
                             </div>
                             <svg class="history-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
@@ -2733,7 +4075,22 @@
                 const completed = document.querySelector('.day-card-item[data-day="' + i + '"]').classList.contains('completed');
                 todos.push({ text, completed });
             }
-            storage.set('rewire', { task, todos, date: new Date().toLocaleDateString('zh-CN') });
+
+            const now = Date.now();
+            const rewireData = { task, todos, date: new Date().toLocaleDateString('zh-CN') };
+
+            // 保存当前任务
+            storage.set('rewire', rewireData);
+
+            // 添加到历史记录
+            let history = storage.get('rewireHistory') || [];
+            history.push({
+                id: now,
+                task: task,
+                todos: todos
+            });
+            storage.set('rewireHistory', history);
+
             showToast('目标已保存');
         }
 
@@ -2827,10 +4184,36 @@
             });
         });
 
+        // 默认文案库
+        const defaultQuotes = [
+            { id: 1, text: "今天也要温柔对待自己", createdAt: Date.now() },
+            { id: 2, text: "允许自己慢慢变好", createdAt: Date.now() },
+            { id: 3, text: "每一个当下都是新的开始", createdAt: Date.now() },
+            { id: 4, text: "接纳不完美的自己", createdAt: Date.now() },
+            { id: 5, text: "慢慢来，比较快", createdAt: Date.now() },
+            { id: 6, text: "你已经在成为更好的路上了", createdAt: Date.now() },
+            { id: 7, text: "休息也是进步的一部分", createdAt: Date.now() },
+            { id: 8, text: "相信自己，你有无限可能", createdAt: Date.now() }
+        ];
+
+        // 初始化文案库
+        function initQuoteLibrary() {
+            const quotes = storage.get('quotes');
+            if (!quotes || quotes.length === 0) {
+                storage.set('quotes', defaultQuotes);
+            }
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             // 检查并归档每日记录（凌晨5点自动归档并清空）
             archiveDailyRecord();
+            
+            // 初始化文案库
+            initQuoteLibrary();
+            
+            // 渲染情绪标签选择区
+            setTimeout(renderEmotionTags, 100);
             
             // 加载今日记录
             loadTodayRecord();
@@ -2858,50 +4241,50 @@
         function renderCalendar() {
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
-            
+
             // 更新月份标题
-            document.getElementById('calendar-month').textContent = 
+            document.getElementById('calendar-month').textContent =
                 `${year}年${month + 1}月`;
-            
+
             // 获取日历网格
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
-            
+
             // 获取当月第一天和最后一天
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             const daysInMonth = lastDay.getDate();
             const startDayOfWeek = firstDay.getDay(); // 0 = 周日
-            
+
             // 获取上个月的日期（用于填充开头）
             const prevMonthLastDay = new Date(year, month, 0).getDate();
-            
+
             // 获取今日日期
             const today = new Date();
             const todayStr = today.toLocaleDateString('zh-CN');
-            
+
             // 获取所有记录
             const dailyRecords = storage.get('dailyRecords') || {};
-            
+
             // 填充上个月的日期
             for (let i = startDayOfWeek - 1; i >= 0; i--) {
                 const day = prevMonthLastDay - i;
                 const dayEl = createDayElement(day, true, false, false, null);
                 grid.appendChild(dayEl);
             }
-            
+
             // 填充当月的日期
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
                 const dateStr = date.toLocaleDateString('zh-CN');
                 const isToday = dateStr === todayStr;
-                const hasRecord = dailyRecords[dateStr] && 
+                const hasRecord = dailyRecords[dateStr] &&
                     (dailyRecords[dateStr].thoughts || dailyRecords[dateStr].feelings || dailyRecords[dateStr].block);
-                
+
                 const dayEl = createDayElement(day, false, isToday, hasRecord, dateStr);
                 grid.appendChild(dayEl);
             }
-            
+
             // 填充下个月的日期（补全网格）
             const totalCells = grid.children.length;
             const remainingCells = 42 - totalCells; // 6行 x 7列 = 42
@@ -2909,6 +4292,160 @@
                 const dayEl = createDayElement(day, true, false, false, null);
                 grid.appendChild(dayEl);
             }
+
+            // 更新统计数据仪表盘
+            updateStatsDashboard();
+        }
+
+        // 更新统计数据仪表盘
+        function updateStatsDashboard() {
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const rewire = storage.get('rewire');
+
+            // 1. 本周记录次数
+            const weekRecords = getWeekRecords(dailyRecords);
+            document.getElementById('stats-week-records').textContent = weekRecords;
+
+            // 2. 连续打卡天数
+            const streakDays = getStreakDays(dailyRecords);
+            document.getElementById('stats-streak-days').textContent = streakDays;
+
+            // 3. 重塑任务完成率
+            const rewireRate = getRewireCompletionRate(rewire);
+            document.getElementById('stats-rewire-rate').textContent = rewireRate + '%';
+            document.getElementById('stats-rewire-progress').style.width = rewireRate + '%';
+
+            // 4. 情绪分布
+            renderEmotionStats(dailyRecords);
+        }
+
+        // 获取本周记录次数
+        function getWeekRecords(dailyRecords) {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0 = 周日, 1 = 周一
+            const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1); // 调整为周一开始
+            const monday = new Date(today.setDate(diff));
+            monday.setHours(0, 0, 0, 0);
+
+            let count = 0;
+            Object.keys(dailyRecords).forEach(dateStr => {
+                const recordDate = new Date(dateStr);
+                if (recordDate >= monday) {
+                    const record = dailyRecords[dateStr];
+                    if (record.thoughts || record.feelings || record.block) {
+                        count++;
+                    }
+                }
+            });
+            return count;
+        }
+
+        // 获取连续打卡天数
+        function getStreakDays(dailyRecords) {
+            const dates = Object.keys(dailyRecords)
+                .filter(dateStr => {
+                    const record = dailyRecords[dateStr];
+                    return record.thoughts || record.feelings || record.block;
+                })
+                .map(dateStr => new Date(dateStr))
+                .sort((a, b) => b - a); // 降序排列
+
+            if (dates.length === 0) return 0;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let streak = 0;
+            let checkDate = new Date(today);
+
+            // 检查今天是否有记录
+            const todayStr = today.toLocaleDateString('zh-CN');
+            const hasTodayRecord = dailyRecords[todayStr] &&
+                (dailyRecords[todayStr].thoughts || dailyRecords[todayStr].feelings || dailyRecords[todayStr].block);
+
+            if (!hasTodayRecord) {
+                // 如果今天没有记录，从昨天开始检查
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+
+            while (true) {
+                const dateStr = checkDate.toLocaleDateString('zh-CN');
+                const record = dailyRecords[dateStr];
+                if (record && (record.thoughts || record.feelings || record.block)) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+
+            return streak;
+        }
+
+        // 获取重塑任务完成率
+        function getRewireCompletionRate(rewire) {
+            if (!rewire || !rewire.todos || rewire.todos.length === 0) return 0;
+
+            const completed = rewire.todos.filter(todo => todo.completed).length;
+            return Math.round((completed / rewire.todos.length) * 100);
+        }
+
+        // 渲染情绪统计
+        function renderEmotionStats(dailyRecords) {
+            const emotionCount = {};
+            let totalEmotions = 0;
+
+            // 统计所有情绪
+            Object.values(dailyRecords).forEach(record => {
+                if (record.emotions && record.emotions.length > 0) {
+                    record.emotions.forEach(emotion => {
+                        const emotionId = emotion.id || emotion.name;
+                        emotionCount[emotionId] = (emotionCount[emotionId] || 0) + 1;
+                        totalEmotions++;
+                    });
+                }
+            });
+
+            const emotionListEl = document.getElementById('stats-emotion-list');
+
+            if (totalEmotions === 0) {
+                emotionListEl.innerHTML = '<span class="stats-empty">暂无记录</span>';
+                return;
+            }
+
+            // 获取情绪配置
+            const emotionConfig = [
+                { id: 'happy', name: '开心', emoji: '😊', color: '#FFD54F' },
+                { id: 'excited', name: '兴奋', emoji: '🤩', color: '#FF8A65' },
+                { id: 'calm', name: '平静', emoji: '😌', color: '#81C784' },
+                { id: 'silent', name: '沉默', emoji: '😶', color: '#B0BEC5' },
+                { id: 'anxious', name: '焦虑', emoji: '😣', color: '#64B5F6' },
+                { id: 'sad', name: '低落', emoji: '😔', color: '#9575CD' },
+                { id: 'procrastination', name: '拖延', emoji: '😫', color: '#F06292' },
+                { id: 'doubt', name: '自我怀疑', emoji: '🤔', color: '#90A4AE' }
+            ];
+
+            // 排序并取前3个
+            const sortedEmotions = Object.entries(emotionCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+
+            emotionListEl.innerHTML = sortedEmotions.map(([emotionId, count]) => {
+                const config = emotionConfig.find(e => e.id === emotionId) ||
+                              emotionConfig.find(e => e.name === emotionId) ||
+                              { emoji: '😐', color: '#B0BEC5', name: emotionId };
+                const percentage = Math.round((count / totalEmotions) * 100);
+
+                return `
+                    <div class="stats-emotion-item">
+                        <span class="stats-emotion-emoji">${config.emoji}</span>
+                        <div class="stats-emotion-bar">
+                            <div class="stats-emotion-fill" style="width: ${percentage}%; background: ${config.color};"></div>
+                        </div>
+                        <span class="stats-emotion-percent">${percentage}%</span>
+                    </div>
+                `;
+            }).join('');
         }
 
         // 创建日期元素
@@ -2996,12 +4533,291 @@
             menu.classList.toggle('show');
         }
 
-        // 显示文案管理页面
+        // 显示文案管理页面（从日历菜单）
         function showQuoteManagePage() {
             document.getElementById('calendar-menu').classList.remove('show');
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-quote-manage').classList.add('active');
             loadQuoteList();
+        }
+
+        // 显示文案管理页面（从更多页面）
+        function showQuoteManagePageFromMore() {
+            closeMoreSheet();
+            setTimeout(() => {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-quote-manage').classList.add('active');
+                loadQuoteList();
+            }, 200);
+        }
+
+        // 专注模式相关变量
+        let focusModeAutoSaveInterval = null;
+        let focusModeContent = '';
+
+        // 进入专注模式
+        function enterFocusMode() {
+            closeMoreSheet();
+            setTimeout(() => {
+                // 隐藏所有页面，显示专注模式
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-focus-mode').classList.add('active');
+                
+                // 隐藏底部导航栏
+                document.querySelector('.bottom-nav').style.display = 'none';
+                
+                // 加载已有内容
+                loadFocusModeContent();
+                
+                // 自动聚焦输入框
+                const input = document.getElementById('focus-mode-input');
+                input.focus();
+                
+                // 启动自动保存
+                startFocusModeAutoSave();
+                
+                // 绑定键盘和手势事件
+                bindFocusModeEvents();
+            }, 200);
+        }
+
+        // 退出专注模式
+        function exitFocusMode() {
+            try {
+                // 保存内容
+                saveFocusModeContent();
+            } catch (e) {
+                console.error('保存专注模式内容失败:', e);
+            }
+            
+            try {
+                // 停止自动保存
+                stopFocusModeAutoSave();
+            } catch (e) {
+                console.error('停止自动保存失败:', e);
+            }
+            
+            try {
+                // 解绑键盘和手势事件
+                unbindFocusModeEvents();
+            } catch (e) {
+                console.error('解绑事件失败:', e);
+            }
+            
+            // 显示底部导航栏
+            const bottomNav = document.querySelector('.bottom-nav');
+            if (bottomNav) {
+                bottomNav.style.display = 'flex';
+            }
+            
+            // 始终返回首页
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const homePage = document.getElementById('page-home');
+            if (homePage) {
+                homePage.classList.add('active');
+            }
+            
+            // 重置导航状态（首页激活）
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const firstNavItem = document.querySelectorAll('.nav-item')[0];
+            if (firstNavItem) {
+                firstNavItem.classList.add('active');
+            }
+        }
+
+        // 绑定专注模式事件（Esc键、左滑手势、页面失焦）
+        function bindFocusModeEvents() {
+            // Esc键退出
+            document.addEventListener('keydown', handleFocusModeKeydown);
+            
+            // 页面失焦时保存
+            window.addEventListener('blur', handleFocusModeBlur);
+            
+            // 左滑手势
+            const focusPage = document.getElementById('page-focus-mode');
+            if (focusPage) {
+                focusPage.addEventListener('touchstart', handleTouchStart, { passive: true });
+                focusPage.addEventListener('touchend', handleTouchEnd, { passive: true });
+            }
+        }
+
+        // 解绑专注模式事件
+        function unbindFocusModeEvents() {
+            document.removeEventListener('keydown', handleFocusModeKeydown);
+            window.removeEventListener('blur', handleFocusModeBlur);
+            
+            const focusPage = document.getElementById('page-focus-mode');
+            if (focusPage) {
+                focusPage.removeEventListener('touchstart', handleTouchStart);
+                focusPage.removeEventListener('touchend', handleTouchEnd);
+            }
+            
+            // 清除触摸数据
+            touchStartX = null;
+        }
+
+        // 处理键盘事件
+        function handleFocusModeKeydown(e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+
+                // 检查菜单是否打开，如果打开则关闭菜单
+                const menu = document.getElementById('focus-mode-menu');
+                if (menu && menu.classList.contains('show')) {
+                    menu.classList.remove('show');
+                    return;
+                }
+
+                // 菜单未打开，退出专注模式
+                exitFocusMode();
+            }
+        }
+
+        // 处理页面失焦
+        function handleFocusModeBlur() {
+            saveFocusModeContent();
+        }
+
+        // 触摸手势变量
+        let touchStartX = null;
+        const SWIPE_THRESHOLD = 80; // 滑动阈值
+
+        // 处理触摸开始
+        function handleTouchStart(e) {
+            touchStartX = e.touches[0].clientX;
+        }
+
+        // 处理触摸结束
+        function handleTouchEnd(e) {
+            if (touchStartX === null) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+            
+            // 左滑（从右向左）退出
+            if (diff > SWIPE_THRESHOLD) {
+                exitFocusMode();
+            }
+            
+            touchStartX = null;
+        }
+
+        // 加载专注模式内容
+        function loadFocusModeContent() {
+            const today = new Date().toLocaleDateString('zh-CN');
+            const dailyRecords = storage.get('dailyRecords') || {};
+            const todayRecord = dailyRecords[today];
+            
+            const input = document.getElementById('focus-mode-input');
+            if (todayRecord && todayRecord.thoughts) {
+                input.value = todayRecord.thoughts;
+                focusModeContent = todayRecord.thoughts;
+            } else {
+                input.value = '';
+                focusModeContent = '';
+            }
+        }
+
+        // 保存专注模式内容
+        function saveFocusModeContent() {
+            const input = document.getElementById('focus-mode-input');
+            const content = input.value.trim();
+
+            if (content === focusModeContent) return; // 内容未变化，不保存
+
+            const today = new Date().toLocaleDateString('zh-CN');
+            let dailyRecords = storage.get('dailyRecords') || {};
+
+            if (!dailyRecords[today]) {
+                dailyRecords[today] = {
+                    date: today,
+                    thoughts: '',
+                    feelings: '',
+                    block: '',
+                    emotions: [],
+                    updatedAt: Date.now()
+                };
+            }
+
+            dailyRecords[today].thoughts = content;
+            dailyRecords[today].updatedAt = Date.now();
+
+            storage.set('dailyRecords', dailyRecords);
+            focusModeContent = content;
+        }
+
+        // 清空专注模式内容
+        function clearFocusModeContent() {
+            const input = document.getElementById('focus-mode-input');
+            if (input.value.trim() === '') {
+                showToast('内容已为空');
+                return;
+            }
+
+            if (confirm('确定要清空当前内容吗？此操作不可恢复。')) {
+                input.value = '';
+                focusModeContent = '';
+                saveFocusModeContent();
+                showToast('已清空');
+            }
+        }
+
+        // 查看专注模式历史记录
+        function showFocusModeHistory() {
+            // 跳转到日志页面查看历史
+            exitFocusMode();
+            setTimeout(() => {
+                showPage('log');
+            }, 100);
+        }
+
+        // 切换专注模式菜单
+        function toggleFocusModeMenu() {
+            const menu = document.getElementById('focus-mode-menu');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        }
+
+        // 点击页面空白处关闭菜单
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('focus-mode-menu');
+            const menuBtn = document.querySelector('.focus-mode-menu-btn');
+
+            if (menu && menu.classList.contains('show')) {
+                // 如果点击的不是菜单按钮且不是菜单内部，则关闭菜单
+                if (!menuBtn.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            }
+        });
+
+        // 启动自动保存
+        function startFocusModeAutoSave() {
+            // 每3秒自动保存一次
+            focusModeAutoSaveInterval = setInterval(() => {
+                saveFocusModeContent();
+            }, 3000);
+            
+            // 监听输入事件，实时保存
+            const input = document.getElementById('focus-mode-input');
+            input.addEventListener('input', () => {
+                // 输入时延迟保存，避免频繁写入
+                clearTimeout(window.focusModeSaveTimeout);
+                window.focusModeSaveTimeout = setTimeout(() => {
+                    saveFocusModeContent();
+                }, 1000);
+            });
+        }
+
+        // 停止自动保存
+        function stopFocusModeAutoSave() {
+            if (focusModeAutoSaveInterval) {
+                clearInterval(focusModeAutoSaveInterval);
+                focusModeAutoSaveInterval = null;
+            }
+            const input = document.getElementById('focus-mode-input');
+            input.removeEventListener('input', () => {});
         }
 
         // 返回日历页面
@@ -3201,6 +5017,70 @@
             showToast('文案已删除');
         }
 
+        // 获取今天的日期字符串 YYYY-MM-DD
+        function getTodayDateString() {
+            const today = new Date();
+            return today.getFullYear() + '-' +
+                   String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                   String(today.getDate()).padStart(2, '0');
+        }
+
+        // 获取今日固定文案
+        function getTodayQuote() {
+            const quotes = storage.get('quotes') || [];
+            if (quotes.length === 0) return null;
+
+            const today = getTodayDateString();
+            const savedDate = storage.get('homeQuoteDate');
+            const savedQuote = storage.get('homeQuoteText');
+
+            // 如果日期相同且已保存文案，直接返回
+            if (savedDate === today && savedQuote) {
+                return savedQuote;
+            }
+
+            // 否则随机生成一句并保存
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            const newQuote = quotes[randomIndex].text;
+
+            storage.set('homeQuoteDate', today);
+            storage.set('homeQuoteText', newQuote);
+
+            return newQuote;
+        }
+
+        // 刷新今日文案
+        function refreshTodayQuote() {
+            const quotes = storage.get('quotes') || [];
+            if (quotes.length === 0) return;
+
+            const today = getTodayDateString();
+            let newQuote;
+
+            // 确保新文案与当前不同
+            const currentQuote = storage.get('homeQuoteText');
+            do {
+                const randomIndex = Math.floor(Math.random() * quotes.length);
+                newQuote = quotes[randomIndex].text;
+            } while (newQuote === currentQuote && quotes.length > 1);
+
+            storage.set('homeQuoteDate', today);
+            storage.set('homeQuoteText', newQuote);
+
+            // 更新显示
+            const quoteText = document.getElementById('home-quote-text');
+            const quoteContainer = document.getElementById('home-quote');
+
+            // 添加淡入动画效果
+            quoteText.style.opacity = '0';
+            setTimeout(() => {
+                quoteText.textContent = newQuote;
+                quoteText.style.opacity = '1';
+            }, 200);
+
+            return newQuote;
+        }
+
         // 加载首页随机文案
         function loadHomeQuote() {
             const quotes = storage.get('quotes') || [];
@@ -3212,38 +5092,42 @@
                 return;
             }
 
-            // 获取今天应该显示的文案（基于日期）
-            const today = new Date();
-            const daySeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-            const index = daySeed % quotes.length;
-            const todayQuote = quotes[index];
+            // 获取今日固定文案
+            const todayQuote = getTodayQuote();
 
-            quoteText.textContent = todayQuote.text;
+            quoteText.textContent = todayQuote;
             quoteContainer.style.display = 'block';
+
+            // 绑定点击刷新事件
+            quoteContainer.onclick = function() {
+                refreshTodayQuote();
+            };
+
+            // 添加点击反馈样式
+            quoteContainer.style.cursor = 'pointer';
         }
 
         // 注册 Service Worker 实现离线可用
         if ('serviceWorker' in navigator) {
-            const swCode = `
-                self.addEventListener('install', e => {
-                    e.waitUntil(
-                        caches.open('3r-cache').then(cache => {
-                            return cache.addAll(['/']);
-                        })
-                    );
-                });
-                self.addEventListener('fetch', e => {
-                    e.respondWith(
-                        caches.match(e.request).then(response => {
-                            return response || fetch(e.request);
-                        })
-                    );
-                });
-            `;
-            const blob = new Blob([swCode], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).catch(() => {
-                console.log('Service Worker 注册失败，但不影响使用');
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('[SW] Service Worker 注册成功:', registration.scope);
+                        
+                        // 监听 Service Worker 更新
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[SW] 发现新版本，请刷新页面以更新');
+                                    // 可以在这里显示更新提示
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('[SW] Service Worker 注册失败:', error);
+                    });
             });
         }
     </script>
